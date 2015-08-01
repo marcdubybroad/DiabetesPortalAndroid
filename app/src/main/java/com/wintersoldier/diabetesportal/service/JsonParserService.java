@@ -2,6 +2,9 @@ package com.wintersoldier.diabetesportal.service;
 
 import com.wintersoldier.diabetesportal.bean.Experiment;
 
+import org.json.JSONObject;
+import org.json.JSONTokener;
+
 import java.util.List;
 
 /**
@@ -51,13 +54,27 @@ public class JsonParserService {
     protected List<Experiment> loadExperiments() {
         // instance variables
         List<Experiment> experimentList = null;
+        JSONObject jsonObject = null;
+        JSONTokener tokener = null;
 
         // get the json
+        tokener = new JSONTokener(this.getJsonMetadata());
 
         // parse the json
 
         // return
         return experimentList;
+    }
+
+    protected String getJsonMetadata() {
+        // local variables
+        String jsonString = null;
+
+        // read the file
+        jsonString = "test";
+
+        // return
+        return jsonString;
     }
 
 }
