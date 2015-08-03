@@ -7,6 +7,8 @@ import java.util.List;
  */
 public interface DataSet {
 
+    public List<DataSet> getChildren();
+
     public List<DataSet> getRecursiveChildren();
 
     public List<DataSet> getRecursiveParents();

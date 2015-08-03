@@ -143,6 +143,8 @@ public class JsonParserService {
     protected DataSet createDataSetFromJson(JSONObject jsonObject) throws PortalException {
         // local variables
         DataSetBean dataSet = new DataSetBean();
+        JSONArray dataSetArray;
+        DataSet tempDataSet;
 
         try {
             // create the object and add the primitive variables
@@ -153,7 +155,13 @@ public class JsonParserService {
 
             // add in phenotypes
 
-            // recursively add in any other child sampel groups
+            // recursively add in any other child sample groups
+            dataSetArray = jsonObject.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
+            for (int i = 0; i < dataSetArray.length(); i++) {
+                tempDataSet = this.createDataSetFromJson(dataSetArray.getJSONObject(i));
+                dataSet.getChildren().add(tempDataSet);
+
+            }
 
         } catch (JSONException exception) {
             throw new PortalException("Got error creating dataSet: " + exception.getMessage());

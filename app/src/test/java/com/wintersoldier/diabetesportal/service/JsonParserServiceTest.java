@@ -1,5 +1,6 @@
 package com.wintersoldier.diabetesportal.service;
 
+import com.wintersoldier.diabetesportal.bean.DataSet;
 import com.wintersoldier.diabetesportal.bean.Experiment;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
@@ -110,6 +111,12 @@ public class JsonParserServiceTest extends TestCase {
         Experiment experiment = experimentList.get(0);
         assertNotNull(experiment);
         assertTrue(experiment.getDataSets().size() > 0);
+
+        // test the grandchildren datasets
+        DataSet dataSet = experiment.getDataSets().get(0);
+        assertNotNull(dataSet);
+        assertTrue(dataSet.getChildren().size() > 0);
+        assertTrue(dataSet.getRecursiveChildren().size() > dataSet.getChildren().size());
 
     }
 }
