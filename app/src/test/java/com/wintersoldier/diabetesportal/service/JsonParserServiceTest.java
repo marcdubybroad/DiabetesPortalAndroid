@@ -95,7 +95,7 @@ public class JsonParserServiceTest extends TestCase {
 
         // parse the experiments
         try {
-            this.jsonParserService.parseExperiments(experimentList, simpleJsonString);
+            this.jsonParserService.parseExperiments(experimentList, jsonString);
 
         } catch (PortalException exception) {
             fail("got json parsing exception: " + exception.getMessage());
@@ -104,6 +104,12 @@ public class JsonParserServiceTest extends TestCase {
         // test size and non null of list
         assertNotNull(experimentList);
         assertTrue(experimentList.size() > 0);
-        assertEquals(experimentList.size(), 26);
+        assertEquals(25, experimentList.size());
+
+        // test the children dataset
+        Experiment experiment = experimentList.get(0);
+        assertNotNull(experiment);
+        assertTrue(experiment.getDataSets().size() > 0);
+
     }
 }

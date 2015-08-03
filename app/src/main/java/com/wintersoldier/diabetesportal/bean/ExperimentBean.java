@@ -1,5 +1,6 @@
 package com.wintersoldier.diabetesportal.bean;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,6 +40,10 @@ public class ExperimentBean implements Experiment {
     }
 
     public List<DataSet> getDataSets() {
+        if (this.dataSetList == null) {
+            this.dataSetList = new ArrayList<DataSet>();
+        }
+
         return dataSetList;
     }
 

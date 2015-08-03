@@ -1,5 +1,7 @@
 package com.wintersoldier.diabetesportal.service;
 
+import com.wintersoldier.diabetesportal.bean.DataSet;
+import com.wintersoldier.diabetesportal.bean.DataSetBean;
 import com.wintersoldier.diabetesportal.bean.Experiment;
 import com.wintersoldier.diabetesportal.bean.ExperimentBean;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
@@ -93,7 +95,8 @@ public class JsonParserService {
         // local variables
         JSONTokener tokener;
         JSONObject rootJson, tempJson;
-        JSONArray experimentArray;
+        JSONArray experimentArray, dataSetArray;
+        DataSet dataSet;
 
         try {
             // create the tokener
@@ -114,12 +117,50 @@ public class JsonParserService {
                 ExperimentBean experiment = new ExperimentBean();
                 experiment.setName(tempJson.getString(PortalConstants.JSON_NAME_KEY));
                 experimentList.add(experiment);
+
+                // look for sample groups
+                dataSetArray = tempJson.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
+                for (int j = 0; j < dataSetArray.length(); j++) {
+                    // for each dataset, create a dataset object and add to experiment
+                    dataSet = this.createDataSetFromJson(dataSetArray.getJSONObject(j));
+                    experiment.getDataSets().add(dataSet);
+                }
             }
 
         } catch (JSONException exception) {
             // log error if need be, convert exception
             throw new PortalException(exception.getMessage());
         }
+    }
+
+    /**
+     * create and add dataset from json object
+     *
+     * @param jsonObject
+     * @return
+     * @throws PortalException
+     */
+    protected DataSet createDataSetFromJson(JSONObject jsonObject) throws PortalException {
+        // local variables
+        DataSetBean dataSet = new DataSetBean();
+
+        try {
+            // create the object and add the primitive variables
+            dataSet.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
+            dataSet.setAncestry(jsonObject.getString(PortalConstants.JSON_ANCESTRY_KEY));
+
+            // add in properties
+
+            // add in phenotypes
+
+            // recursively add in any other child sampel groups
+
+        } catch (JSONException exception) {
+            throw new PortalException("Got error creating dataSet: " + exception.getMessage());
+        }
+
+        // return the object
+        return dataSet;
     }
 
     /*
