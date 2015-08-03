@@ -11,6 +11,8 @@ public class DataSetBean implements DataSet {
     private String name;
     private String ancestry;
     private List<DataSet> dataSetList;
+    private List<Property> propertyList;
+    private List<Phenotype> phenotypeList;
 
     public void setName(String name) {
         this.name = name;
@@ -65,12 +67,20 @@ public class DataSetBean implements DataSet {
 
     @Override
     public List<Phenotype> getPhenotypes() {
-        return null;
+        if (this.phenotypeList == null) {
+            this.phenotypeList = new ArrayList<Phenotype>();
+        }
+
+        return this.phenotypeList;
     }
 
     @Override
     public List<Property> getProperties() {
-        return null;
+        if (this.propertyList == null) {
+            this.propertyList = new ArrayList<Property>();
+        }
+
+        return this.propertyList;
     }
 
     @Override

@@ -4,6 +4,9 @@ import com.wintersoldier.diabetesportal.bean.DataSet;
 import com.wintersoldier.diabetesportal.bean.DataSetBean;
 import com.wintersoldier.diabetesportal.bean.Experiment;
 import com.wintersoldier.diabetesportal.bean.ExperimentBean;
+import com.wintersoldier.diabetesportal.bean.Phenotype;
+import com.wintersoldier.diabetesportal.bean.Property;
+import com.wintersoldier.diabetesportal.bean.PropertyBean;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
@@ -143,8 +146,10 @@ public class JsonParserService {
     protected DataSet createDataSetFromJson(JSONObject jsonObject) throws PortalException {
         // local variables
         DataSetBean dataSet = new DataSetBean();
-        JSONArray dataSetArray;
+        JSONArray tempArray;
         DataSet tempDataSet;
+        Property tempProperty;
+        Phenotype tempPhenotype;
 
         try {
             // create the object and add the primitive variables
@@ -152,15 +157,19 @@ public class JsonParserService {
             dataSet.setAncestry(jsonObject.getString(PortalConstants.JSON_ANCESTRY_KEY));
 
             // add in properties
+            tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PROPERTIES_KEY);
+            for (int i = 0; i < tempArray.length(); i++) {
+                tempProperty = this.createPropertyFromJson(tempArray.getJSONObject(i));
+                dataSet.getProperties().add(tempProperty);
+            }
 
             // add in phenotypes
 
             // recursively add in any other child sample groups
-            dataSetArray = jsonObject.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
-            for (int i = 0; i < dataSetArray.length(); i++) {
-                tempDataSet = this.createDataSetFromJson(dataSetArray.getJSONObject(i));
+            tempArray = jsonObject.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
+            for (int i = 0; i < tempArray.length(); i++) {
+                tempDataSet = this.createDataSetFromJson(tempArray.getJSONObject(i));
                 dataSet.getChildren().add(tempDataSet);
-
             }
 
         } catch (JSONException exception) {
@@ -169,6 +178,29 @@ public class JsonParserService {
 
         // return the object
         return dataSet;
+    }
+
+    /**
+     * create a property object from the json object handed in
+     *
+     * @param jsonObject
+     * @return
+     * @throws PortalException
+     */
+    protected Property createPropertyFromJson(JSONObject jsonObject) throws PortalException {
+        // local variables
+        PropertyBean property = new PropertyBean();
+
+        // get values and put in new object
+        try {
+            property.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
+            property.setType(jsonObject.getString(PortalConstants.JSON_TYPE_KEY));
+
+        } catch (JSONException exception) {
+            throw new PortalException("Got property building exception: " + exception.getMessage());
+        }
+
+        return property;
     }
 
     /*
