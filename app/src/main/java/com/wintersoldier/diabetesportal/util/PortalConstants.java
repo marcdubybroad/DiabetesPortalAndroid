@@ -10,6 +10,7 @@ public class PortalConstants {
     public final static String JSON_VERSION_KEY         = "version";
     public final static String JSON_NAME_KEY            = "name";
     public final static String JSON_TYPE_KEY            = "type";
+    public final static String JSON_GROUP_KEY            = "group";
     public final static String JSON_TECHNOLOGY_KEY      = "technology";
     public final static String JSON_ANCESTRY_KEY        = "ancestry";
 

@@ -5,6 +5,7 @@ import com.wintersoldier.diabetesportal.bean.DataSetBean;
 import com.wintersoldier.diabetesportal.bean.Experiment;
 import com.wintersoldier.diabetesportal.bean.ExperimentBean;
 import com.wintersoldier.diabetesportal.bean.Phenotype;
+import com.wintersoldier.diabetesportal.bean.PhenotypeBean;
 import com.wintersoldier.diabetesportal.bean.Property;
 import com.wintersoldier.diabetesportal.bean.PropertyBean;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
@@ -164,6 +165,11 @@ public class JsonParserService {
             }
 
             // add in phenotypes
+            tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PHENOTYPES_KEY);
+            for (int i = 0; i < tempArray.length(); i++) {
+                tempPhenotype = this.createPhenotypeFromJson(tempArray.getJSONObject(i));
+                dataSet.getPhenotypes().add(tempPhenotype);
+            }
 
             // recursively add in any other child sample groups
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
@@ -203,6 +209,38 @@ public class JsonParserService {
         return property;
     }
 
+    /**
+     * create a phenotype object from a given json object
+     *
+     * @param jsonObject
+     * @return
+     * @throws PortalException
+     */
+    protected Phenotype createPhenotypeFromJson(JSONObject jsonObject) throws PortalException {
+        // local variables
+        PhenotypeBean phenotype = new PhenotypeBean();
+        JSONArray tempArray;
+        Property tempProperty;
+
+        // get values from json object and put in new phenotype object
+        try {
+            // get the primitive variables
+            phenotype.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
+            phenotype.setGroup(jsonObject.getString(PortalConstants.JSON_GROUP_KEY));
+
+            // get the sub properties
+            tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PROPERTIES_KEY);
+            for (int i = 0; i < tempArray.length(); i++) {
+                tempProperty = this.createPropertyFromJson(tempArray.getJSONObject(i));
+                phenotype.getProperties().add(tempProperty);
+            }
+
+        } catch (JSONException exception) {
+            throw new PortalException("Got phenotype parsign error: " + exception.getMessage());
+        }
+
+        return phenotype;
+    }
     /*
     protected JSONArray extractArrayFromJson(final JSONObject jsonObject, final String key) throws JSONException {
         final JSONArray jsonArray =  jsonObject.getJSONArray(key);

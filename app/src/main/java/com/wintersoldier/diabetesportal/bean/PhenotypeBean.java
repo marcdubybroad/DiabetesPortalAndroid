@@ -10,9 +10,19 @@ public class PhenotypeBean implements Phenotype {
     // instance variables
     private String name;
     private int sortOrder;
+    private String group;
     private List<Property> propertyList;
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setSortOrder(int sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
     @Override
+
     public String getName() {
         return this.getName();
     }
@@ -20,6 +30,15 @@ public class PhenotypeBean implements Phenotype {
     @Override
     public int getSortOrder() {
         return this.sortOrder;
+    }
+
+    @Override
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     @Override

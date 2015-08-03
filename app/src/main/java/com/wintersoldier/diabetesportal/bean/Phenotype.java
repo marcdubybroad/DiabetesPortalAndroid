@@ -12,6 +12,8 @@ public interface Phenotype {
 
     public int getSortOrder();
 
+    public String getGroup();
+
     public List<Property> getProperties();
 
 }
