@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by mduby on 7/28/15.
  */
-public interface DataSet {
+public interface DataSet extends MetadataLeaf {
 
     public List<DataSet> getChildren();
 

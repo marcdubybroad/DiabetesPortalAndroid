@@ -18,4 +18,10 @@ public class PortalConstants {
     public final static String JSON_DATASETS_KEY        = "sample_groups";
     public final static String JSON_PROPERTIES_KEY      = "properties";
     public final static String JSON_PHENOTYPES_KEY      = "phenotypes";
+
+    // constant types for metadata object tree
+    public final static String TYPE_DATASET_KEY         = "dataset";
+    public final static String TYPE_PHENOTYPE_KEY       = "phenotype";
+    public final static String TYPE_PROPERTY_KEY        = "property";
+
 }

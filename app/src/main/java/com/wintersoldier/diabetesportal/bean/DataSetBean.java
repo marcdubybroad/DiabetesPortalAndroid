@@ -1,5 +1,7 @@
 package com.wintersoldier.diabetesportal.bean;
 
+import com.wintersoldier.diabetesportal.util.PortalConstants;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +15,8 @@ public class DataSetBean implements DataSet {
     private List<DataSet> dataSetList;
     private List<Property> propertyList;
     private List<Phenotype> phenotypeList;
+    private int sortOrder;
+    private MetadataLeaf parent;
 
     public void setName(String name) {
         this.name = name;
@@ -26,7 +30,17 @@ public class DataSetBean implements DataSet {
         this.sortOrder = sortOrder;
     }
 
-    private int sortOrder;
+    public String getType() {
+        return PortalConstants.TYPE_DATASET_KEY;
+    }
+
+    public String getId() {
+        return (this.parent == null ? "" : this.parent.getId()) + this.getId();
+    }
+
+    public MetadataLeaf getParent() {
+        return this.parent;
+    }
 
     public List<DataSet> getChildren() {
         if (this.dataSetList == null) {

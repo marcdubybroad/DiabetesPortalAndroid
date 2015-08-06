@@ -22,3 +22,21 @@ parm=
 },
 
 
+
+parm=
+{
+    "passback": "123abc",
+    "entity": "variant",
+    "page_number": 50,
+    "page_size": 100,
+    "limit": 1000,
+    "count": false,
+    "properties":    {
+                           "cproperty": ["VAR_ID" , "CLOSEST_GENE" , "DBSNP_ID" , "Consequence" , "CHROM" , "POS" , "VAR_ID"],
+                          "orderBy":    ["CHROM"],
+"dproperty" : { } , "pproperty" : { "P_FE_INV" : {  "ExSeq_13k_mdv2" : [ "FG"] } , "BETA" : {  "ExSeq_13k_mdv2" : [ "FG"] }  } } ,
+
+    "filters":    [
+                    {"dataset_id": "ExSeq_13k_mdv2", "phenotype": "FG", "operand": "P_FE_INV", "operator": "LT", "value": 1, "operand_type": "FLOAT"}
+                ]
+},

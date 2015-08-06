@@ -1,0 +1,13 @@
+
+
+- each property/phenotype/dataset should have system id
+  - could be derived from parent
+- each object should have link to parent interface
+
+- rename dataSet to samplegroypu
+  - create dataset as metadata leaf
+  
+- put name in leaf object
+  - id will be name for sg, sg+phnoe for pheno, sg+prop for prop of sg, sg+phnoe+prop for prop of pheno
+  
+  
