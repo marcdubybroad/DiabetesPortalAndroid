@@ -1,0 +1,24 @@
+
+
+
+
+url=http://dig-api-qa.broadinstitute.org/qa/gs/getData,
+parm=
+{
+    "passback": "123abc",
+    "entity": "variant",
+    "page_number": 50,
+    "page_size": 100,
+    "limit": 1000,
+    "count": false,
+    "properties":    {
+                           "cproperty": ["VAR_ID" , "CLOSEST_GENE" , "DBSNP_ID" , "Consequence" , "CHROM" , "POS" , "VAR_ID"],
+                          "orderBy":    ["CHROM"],
+"dproperty" : { } , "pproperty" : { "P_FIRTH_FE_IV" : {  "ExSeq_17k_mdv2" : [ "T2D"] } , "OR_FIRTH_FE_IV" : {  "ExSeq_17k_mdv2" : [ "T2D"] } , "MINA" : {  "ExSeq_17k_mdv2" : [ "T2D"] } , "MINU" : {  "ExSeq_17k_mdv2" : [ "T2D"] }  } } ,
+
+    "filters":    [
+                    {"dataset_id": "ExSeq_17k_mdv2", "phenotype": "T2D", "operand": "P_FIRTH_FE_IV", "operator": "LT", "value": 1, "operand_type": "FLOAT"}
+                ]
+},
+
+
