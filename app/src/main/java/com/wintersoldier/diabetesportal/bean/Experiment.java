@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Created by mduby on 7/30/15.
  */
-public interface Experiment {
+public interface Experiment extends DataSet {
 
     public String getName();
 
@@ -13,5 +13,5 @@ public interface Experiment {
 
     public String getVersion();
 
-    public List<DataSet> getDataSets();
+    public List<SampleGroup> getDataSets();
 }

@@ -8,15 +8,15 @@ import java.util.List;
 /**
  * Created by mduby on 8/2/15.
  */
-public class DataSetBean implements DataSet {
+public class SampleGroupBean implements SampleGroup {
     // instance variables
     private String name;
     private String ancestry;
-    private List<DataSet> dataSetList;
+    private List<SampleGroup> sampleGroupList;
     private List<Property> propertyList;
     private List<Phenotype> phenotypeList;
     private int sortOrder;
-    private MetadataLeaf parent;
+    private DataSet parent;
 
     public void setName(String name) {
         this.name = name;
@@ -31,51 +31,55 @@ public class DataSetBean implements DataSet {
     }
 
     public String getType() {
-        return PortalConstants.TYPE_DATASET_KEY;
+        return PortalConstants.TYPE_SAMPLE_GROUP_KEY;
     }
 
     public String getId() {
         return (this.parent == null ? "" : this.parent.getId()) + this.getId();
     }
 
-    public MetadataLeaf getParent() {
+    public DataSet getParent() {
         return this.parent;
     }
 
-    public List<DataSet> getChildren() {
-        if (this.dataSetList == null) {
-            this.dataSetList = new ArrayList<DataSet>();
+    public List<SampleGroup> getChildren() {
+        if (this.sampleGroupList == null) {
+            this.sampleGroupList = new ArrayList<SampleGroup>();
         }
 
-        return this.dataSetList;
+        return this.sampleGroupList;
+    }
+
+    public void setParent(DataSet parent) {
+        this.parent = parent;
     }
 
     @Override
-    public List<DataSet> getRecursiveChildren() {
+    public List<SampleGroup> getRecursiveChildren() {
         // create a new list from the direct children
-        List<DataSet> tempList = new ArrayList<DataSet>();
+        List<SampleGroup> tempList = new ArrayList<SampleGroup>();
         tempList.addAll(this.getChildren());
 
         // add in the children's children
-        for (DataSet dataSet : this.dataSetList) {
-            tempList.addAll(dataSet.getRecursiveChildren());
+        for (SampleGroup sampleGroup : this.sampleGroupList) {
+            tempList.addAll(sampleGroup.getRecursiveChildren());
         }
 
         return tempList;
     }
 
     @Override
-    public List<DataSet> getRecursiveParents() {
+    public List<SampleGroup> getRecursiveParents() {
         return null;
     }
 
     @Override
-    public List<DataSet> getRecursiveChildrenForPhenotype(Phenotype phenotype) {
+    public List<SampleGroup> getRecursiveChildrenForPhenotype(Phenotype phenotype) {
         return null;
     }
 
     @Override
-    public List<DataSet> getRecursiveParentsForPhenotype(Phenotype phenotype) {
+    public List<SampleGroup> getRecursiveParentsForPhenotype(Phenotype phenotype) {
         return null;
     }
 

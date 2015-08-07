@@ -1,7 +1,8 @@
 package com.wintersoldier.diabetesportal.service;
 
 import com.wintersoldier.diabetesportal.bean.DataSet;
-import com.wintersoldier.diabetesportal.bean.DataSetBean;
+import com.wintersoldier.diabetesportal.bean.SampleGroup;
+import com.wintersoldier.diabetesportal.bean.SampleGroupBean;
 import com.wintersoldier.diabetesportal.bean.Experiment;
 import com.wintersoldier.diabetesportal.bean.ExperimentBean;
 import com.wintersoldier.diabetesportal.bean.Phenotype;
@@ -100,7 +101,7 @@ public class JsonParserService {
         JSONTokener tokener;
         JSONObject rootJson, tempJson;
         JSONArray experimentArray, dataSetArray;
-        DataSet dataSet;
+        SampleGroup sampleGroup;
 
         try {
             // create the tokener
@@ -126,8 +127,8 @@ public class JsonParserService {
                 dataSetArray = tempJson.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
                 for (int j = 0; j < dataSetArray.length(); j++) {
                     // for each dataset, create a dataset object and add to experiment
-                    dataSet = this.createDataSetFromJson(dataSetArray.getJSONObject(j));
-                    experiment.getDataSets().add(dataSet);
+                    sampleGroup = this.createDataSetFromJson(dataSetArray.getJSONObject(j), experiment);
+                    experiment.getDataSets().add(sampleGroup);
                 }
             }
 
@@ -144,38 +145,39 @@ public class JsonParserService {
      * @return
      * @throws PortalException
      */
-    protected DataSet createDataSetFromJson(JSONObject jsonObject) throws PortalException {
+    protected SampleGroup createDataSetFromJson(JSONObject jsonObject, DataSet parent) throws PortalException {
         // local variables
-        DataSetBean dataSet = new DataSetBean();
+        SampleGroupBean sampleGroup = new SampleGroupBean();
         JSONArray tempArray;
-        DataSet tempDataSet;
+        SampleGroup tempSampleGroup;
         Property tempProperty;
         Phenotype tempPhenotype;
 
         try {
             // create the object and add the primitive variables
-            dataSet.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
-            dataSet.setAncestry(jsonObject.getString(PortalConstants.JSON_ANCESTRY_KEY));
+            sampleGroup.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
+            sampleGroup.setAncestry(jsonObject.getString(PortalConstants.JSON_ANCESTRY_KEY));
+            sampleGroup.setParent(parent);
 
             // add in properties
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PROPERTIES_KEY);
             for (int i = 0; i < tempArray.length(); i++) {
-                tempProperty = this.createPropertyFromJson(tempArray.getJSONObject(i));
-                dataSet.getProperties().add(tempProperty);
+                tempProperty = this.createPropertyFromJson(tempArray.getJSONObject(i), sampleGroup);
+                sampleGroup.getProperties().add(tempProperty);
             }
 
             // add in phenotypes
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PHENOTYPES_KEY);
             for (int i = 0; i < tempArray.length(); i++) {
-                tempPhenotype = this.createPhenotypeFromJson(tempArray.getJSONObject(i));
-                dataSet.getPhenotypes().add(tempPhenotype);
+                tempPhenotype = this.createPhenotypeFromJson(tempArray.getJSONObject(i), sampleGroup);
+                sampleGroup.getPhenotypes().add(tempPhenotype);
             }
 
             // recursively add in any other child sample groups
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
             for (int i = 0; i < tempArray.length(); i++) {
-                tempDataSet = this.createDataSetFromJson(tempArray.getJSONObject(i));
-                dataSet.getChildren().add(tempDataSet);
+                tempSampleGroup = this.createDataSetFromJson(tempArray.getJSONObject(i), sampleGroup);
+                sampleGroup.getChildren().add(tempSampleGroup);
             }
 
         } catch (JSONException exception) {
@@ -183,7 +185,7 @@ public class JsonParserService {
         }
 
         // return the object
-        return dataSet;
+        return sampleGroup;
     }
 
     /**
@@ -193,14 +195,15 @@ public class JsonParserService {
      * @return
      * @throws PortalException
      */
-    protected Property createPropertyFromJson(JSONObject jsonObject) throws PortalException {
+    protected Property createPropertyFromJson(JSONObject jsonObject, DataSet parent) throws PortalException {
         // local variables
         PropertyBean property = new PropertyBean();
 
         // get values and put in new object
         try {
             property.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
-            property.setType(jsonObject.getString(PortalConstants.JSON_TYPE_KEY));
+            property.setVariableType(jsonObject.getString(PortalConstants.JSON_TYPE_KEY));
+            property.setParent(parent);
 
         } catch (JSONException exception) {
             throw new PortalException("Got property building exception: " + exception.getMessage());
@@ -216,7 +219,7 @@ public class JsonParserService {
      * @return
      * @throws PortalException
      */
-    protected Phenotype createPhenotypeFromJson(JSONObject jsonObject) throws PortalException {
+    protected Phenotype createPhenotypeFromJson(JSONObject jsonObject, DataSet parent) throws PortalException {
         // local variables
         PhenotypeBean phenotype = new PhenotypeBean();
         JSONArray tempArray;
@@ -231,7 +234,7 @@ public class JsonParserService {
             // get the sub properties
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PROPERTIES_KEY);
             for (int i = 0; i < tempArray.length(); i++) {
-                tempProperty = this.createPropertyFromJson(tempArray.getJSONObject(i));
+                tempProperty = this.createPropertyFromJson(tempArray.getJSONObject(i), phenotype);
                 phenotype.getProperties().add(tempProperty);
             }
 

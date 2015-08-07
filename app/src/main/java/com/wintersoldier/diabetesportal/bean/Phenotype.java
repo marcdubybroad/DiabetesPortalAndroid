@@ -5,8 +5,7 @@ import java.util.List;
 /**
  * Created by mduby on 7/28/15.
  */
-public interface Phenotype {
-
+public interface Phenotype extends DataSet {
 
     public String getName();
 

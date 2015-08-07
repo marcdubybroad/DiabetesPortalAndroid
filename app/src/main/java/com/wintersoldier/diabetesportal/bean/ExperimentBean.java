@@ -1,5 +1,7 @@
 package com.wintersoldier.diabetesportal.bean;
 
+import com.wintersoldier.diabetesportal.util.PortalConstants;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +12,7 @@ public class ExperimentBean implements Experiment {
     private String name;
     private String technology;
     private String version;
-    private List<DataSet> dataSetList;
+    private List<SampleGroup> sampleGroupList;
 
     @Override
     public String getName() {
@@ -39,15 +41,27 @@ public class ExperimentBean implements Experiment {
         this.version = version;
     }
 
-    public List<DataSet> getDataSets() {
-        if (this.dataSetList == null) {
-            this.dataSetList = new ArrayList<DataSet>();
-        }
-
-        return dataSetList;
+    public String getType() {
+        return PortalConstants.TYPE_EXPERIMENT_KEY;
     }
 
-    public void setDataSets(List<DataSet> dataSetList) {
-        this.dataSetList = dataSetList;
+    public String getId() {
+        return this.getName();
+    }
+
+    public DataSet getParent() {
+        return null;
+    }
+
+    public List<SampleGroup> getDataSets() {
+        if (this.sampleGroupList == null) {
+            this.sampleGroupList = new ArrayList<SampleGroup>();
+        }
+
+        return sampleGroupList;
+    }
+
+    public void setDataSets(List<SampleGroup> sampleGroupList) {
+        this.sampleGroupList = sampleGroupList;
     }
 }

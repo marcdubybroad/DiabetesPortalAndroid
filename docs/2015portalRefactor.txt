@@ -4,7 +4,7 @@
   - could be derived from parent
 - each object should have link to parent interface
 
-- rename dataSet to samplegroypu
+- rename sampleGroup to samplegroypu
   - create dataset as metadata leaf
   
 - put name in leaf object
