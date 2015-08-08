@@ -163,4 +163,41 @@ public class JsonParserServiceTest extends TestCase {
         assertEquals(25, nameList.size());
 
     }
+
+    /**
+     * test the get sample group name for phenotype name list
+     */
+    @Test
+    public void testgetSamplesGroupsForPhenotype() {
+        // local variables
+        List<Experiment> experimentList = new ArrayList<Experiment>();
+        String jsonString = null;
+        String phenotype = "T2D";
+
+        // get the json strong to test
+        try {
+            jsonString = new Scanner( getFileFromPath(this, "res/metadata.json") ).useDelimiter("\\A").next();
+            this.jsonParserService.setJsonString(jsonString);
+
+        } catch (FileNotFoundException exception) {
+            fail("got file exception: " + exception.getMessage());
+        }
+
+        // parse the experiments
+        try {
+            this.jsonParserService.parseExperiments(experimentList);
+
+        } catch (PortalException exception) {
+            fail("got json parsing exception: " + exception.getMessage());
+        }
+
+        // get the phenotype name list
+        List<String> nameList = this.jsonParserService.getSamplesGroupsForPhenotype(phenotype);
+        assertNotNull(nameList);
+        assertTrue(nameList.size() > 0);
+        assertEquals(25, nameList.size());
+
+    }
+
+
 }

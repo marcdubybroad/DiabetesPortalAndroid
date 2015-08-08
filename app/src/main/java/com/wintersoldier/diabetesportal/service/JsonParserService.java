@@ -13,7 +13,9 @@ import com.wintersoldier.diabetesportal.bean.Phenotype;
 import com.wintersoldier.diabetesportal.bean.PhenotypeBean;
 import com.wintersoldier.diabetesportal.bean.Property;
 import com.wintersoldier.diabetesportal.bean.PropertyBean;
+import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeNameVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.SampleGroupForPhenotypeVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
@@ -309,6 +311,31 @@ public class JsonParserService {
 
         return phenotype;
     }
+
+    /**
+     * returns a sorted list of the names of sample groups that contain the given phenotype
+     *
+     * @param phenotypeName
+     * @return
+     */
+    public List<String> getSamplesGroupsForPhenotype(String phenotypeName) {
+        // local variables
+        SampleGroupForPhenotypeVisitor sampleGroupVisitor = new SampleGroupForPhenotypeVisitor(phenotypeName);
+        List<String> sampleGroupNameList;
+
+        // pass in visitor looking for sample groups with the selected phenotype
+        for (Experiment experiment: this.getAllExperiments()) {
+            experiment.acceptVisitor(sampleGroupVisitor);
+        }
+
+        // return the resulting string list
+        sampleGroupNameList = sampleGroupVisitor.getSampleGroupNameList();
+
+        // sort and return
+        Collections.sort(sampleGroupNameList);
+        return sampleGroupNameList;
+    }
+
     /*
     protected JSONArray extractArrayFromJson(final JSONObject jsonObject, final String key) throws JSONException {
         final JSONArray jsonArray =  jsonObject.getJSONArray(key);
