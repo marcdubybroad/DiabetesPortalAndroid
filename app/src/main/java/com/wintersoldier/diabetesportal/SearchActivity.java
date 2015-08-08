@@ -2,8 +2,15 @@ package com.wintersoldier.diabetesportal;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+import com.wintersoldier.diabetesportal.service.JsonParserService;
+
+import java.util.List;
 
 
 public class SearchActivity extends ActionBarActivity {
@@ -12,6 +19,33 @@ public class SearchActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        // set the spinner
+        this.displaySpinner();
+    }
+
+    /**
+     * method to load up and display the phenotype name spinner
+     * 
+     */
+    protected void displaySpinner() {
+        // populate the spinner
+        Spinner spinner = (Spinner) this.findViewById(R.id.search_phenotype_spinner);
+
+        // get the list of phenotypes
+        JsonParserService service = JsonParserService.getService();
+        service.setContext(this);
+        List<String>  phenotypeList = service.getAllDistinctPhenotypeNames();
+
+        // log
+        Log.v(this.getClass().getName(), "got phenotype list of size: " + phenotypeList.size());
+
+        // create the array
+        ArrayAdapter<String> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, phenotypeList);
+
+        // set the adapter on the spinner
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
     @Override

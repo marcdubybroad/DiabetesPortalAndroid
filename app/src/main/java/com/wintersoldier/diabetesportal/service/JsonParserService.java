@@ -1,6 +1,7 @@
 package com.wintersoldier.diabetesportal.service;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.wintersoldier.diabetesportal.R;
 import com.wintersoldier.diabetesportal.bean.DataSet;
@@ -69,6 +70,7 @@ public class JsonParserService {
 
             } catch (PortalException exception) {
                 // TODO - message
+                Log.e(this.getClass().getName(), "Got portal exception loading experiments: " + exception.getMessage());
             }
         }
 
