@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
@@ -13,7 +15,10 @@ import com.wintersoldier.diabetesportal.service.JsonParserService;
 import java.util.List;
 
 
-public class SearchActivity extends ActionBarActivity {
+public class SearchActivity extends ActionBarActivity implements AdapterView.OnItemSelectedListener {
+    // instance variables
+    JsonParserService jsonService;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,20 +27,19 @@ public class SearchActivity extends ActionBarActivity {
 
         // set the spinner
         this.displaySpinner();
+
     }
 
     /**
      * method to load up and display the phenotype name spinner
-     * 
+     *
      */
     protected void displaySpinner() {
         // populate the spinner
         Spinner spinner = (Spinner) this.findViewById(R.id.search_phenotype_spinner);
 
         // get the list of phenotypes
-        JsonParserService service = JsonParserService.getService();
-        service.setContext(this);
-        List<String>  phenotypeList = service.getAllDistinctPhenotypeNames();
+        List<String>  phenotypeList = this.getJsonService().getAllDistinctPhenotypeNames();
 
         // log
         Log.v(this.getClass().getName(), "got phenotype list of size: " + phenotypeList.size());
@@ -46,6 +50,9 @@ public class SearchActivity extends ActionBarActivity {
         // set the adapter on the spinner
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+
+        // add this activity as listener
+        spinner.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -68,5 +75,53 @@ public class SearchActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        switch(parent.getId()) {
+            case R.id.search_phenotype_spinner:
+                this.actOnSelectedPhenotype(position);
+                break;
+        }
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    /**
+     * retrieves the selected phenotype and populates the sampe group list based on the selection
+     *
+     * @param position
+     */
+    protected void actOnSelectedPhenotype(int position) {
+        // local variables
+        String selectedPhenotype;
+
+        // get the selected phenotype
+        selectedPhenotype = this.getJsonService().getAllDistinctPhenotypeNames().get(position);
+        Log.i(this.getClass().getName(), "Got selected phenotype: " + selectedPhenotype);
+
+        // retrieve the sample groups which contain this phenotype
+
+        // populate the spinner of sampel groups
+
+    }
+
+    /**
+     * internal way to get acces to the json service
+     *
+     * @return
+     */
+    protected JsonParserService getJsonService() {
+        if (this.jsonService == null) {
+            this.jsonService = JsonParserService.getService();
+            this.jsonService.setContext(this);
+        }
+
+        return this.jsonService;
     }
 }
