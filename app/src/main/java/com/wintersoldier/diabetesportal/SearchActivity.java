@@ -1,30 +1,23 @@
 package com.wintersoldier.diabetesportal;
 
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 
-public class MainActivity extends ActionBarActivity implements View.OnClickListener {
+public class SearchActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        // add the button listeners
-        View searchButton = this.findViewById(R.id.button_main_search);
-        searchButton.setOnClickListener(this);
+        setContentView(R.layout.activity_search);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_search, menu);
         return true;
     }
 
@@ -41,21 +34,5 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * listen to button clicks
-     *
-     * @param view
-     */
-    public void onClick(View view) {
-        Intent intent;
-
-        switch(view.getId()) {
-            case R.id.button_main_search:
-                intent = new Intent(this, SearchActivity.class);
-                this.startActivity(intent);
-                break;
-        }
     }
 }

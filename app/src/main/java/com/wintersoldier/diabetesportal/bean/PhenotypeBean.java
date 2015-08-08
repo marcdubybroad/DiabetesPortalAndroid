@@ -1,5 +1,6 @@
 package com.wintersoldier.diabetesportal.bean;
 
+import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.List;
 /**
  * Created by mduby on 8/3/15.
  */
-public class PhenotypeBean implements Phenotype {
+public class PhenotypeBean implements Phenotype, Comparable {
     // instance variables
     private String name;
     private int sortOrder;
@@ -43,7 +44,7 @@ public class PhenotypeBean implements Phenotype {
     @Override
 
     public String getName() {
-        return this.getName();
+        return this.name;
     }
 
     @Override
@@ -68,4 +69,37 @@ public class PhenotypeBean implements Phenotype {
 
         return this.propertyList;
     }
+
+    @Override
+    public int compareTo(Object another) {
+        PhenotypeBean otherBean = (PhenotypeBean)another;
+
+        // order based on group, then name
+        if (this.getGroup() == null) {
+            return -1;
+        } else if (otherBean.getGroup() == null) {
+            return 1;
+        } else {
+            if (this.getGroup().equals(otherBean.getGroup())) {
+                // should not have to check for nulls here
+                return this.getName().compareTo(otherBean.getName());
+            } else {
+                return this.getGroup().compareTo(otherBean.getGroup());
+            }
+        }
+    }
+
+    /**
+     * implement the visitor pattern
+     *
+     * @param visitor
+     */
+    public void acceptVisitor(DataSetVisitor visitor) {
+        visitor.visit(this);
+
+        for (Property property: this.getProperties()) {
+            property.acceptVisitor(visitor);
+        }
+    }
+
 }

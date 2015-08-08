@@ -1,5 +1,6 @@
 package com.wintersoldier.diabetesportal.bean;
 
+import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class ExperimentBean implements Experiment {
         return null;
     }
 
-    public List<SampleGroup> getDataSets() {
+    public List<SampleGroup> getSampleGroups() {
         if (this.sampleGroupList == null) {
             this.sampleGroupList = new ArrayList<SampleGroup>();
         }
@@ -63,5 +64,18 @@ public class ExperimentBean implements Experiment {
 
     public void setDataSets(List<SampleGroup> sampleGroupList) {
         this.sampleGroupList = sampleGroupList;
+    }
+
+    /**
+     * implement the visitor pattern
+     *
+     * @param visitor
+     */
+    public void acceptVisitor(DataSetVisitor visitor) {
+        visitor.visit(this);
+
+        for (SampleGroup sampleGroup: this.getSampleGroups()) {
+            sampleGroup.acceptVisitor(visitor);
+        }
     }
 }

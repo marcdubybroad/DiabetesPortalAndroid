@@ -3,4 +3,12 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_search">Search the Variant Data</string>
+
+    <string name="button_search">Search For Variants</string>
+
+    <string name="title_search_select_phenotype">Select the Phenotype</string>
+    <string name="title_search_select_dataset">Select the Sample Group</string>
+    <string name="title_search_select_filters">Select the Filters</string>
+
 </resources>

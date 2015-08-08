@@ -1,5 +1,6 @@
 package com.wintersoldier.diabetesportal.bean;
 
+import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 
 import java.util.ArrayList;
@@ -115,4 +116,22 @@ public class SampleGroupBean implements SampleGroup {
     public int getSortOrder() {
         return this.sortOrder;
     }
+
+    /**
+     * implement the visitor pattern
+     *
+     * @param visitor
+     */
+    public void acceptVisitor(DataSetVisitor visitor) {
+        visitor.visit(this);
+
+        for (Property property: this.getProperties()) {
+            property.acceptVisitor(visitor);
+        }
+
+        for (Phenotype phenotype : this.getPhenotypes()) {
+            phenotype.acceptVisitor(visitor);
+        }
+    }
+
 }

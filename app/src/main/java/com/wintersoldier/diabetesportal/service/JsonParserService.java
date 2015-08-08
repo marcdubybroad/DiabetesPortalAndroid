@@ -1,5 +1,8 @@
 package com.wintersoldier.diabetesportal.service;
 
+import android.content.Context;
+
+import com.wintersoldier.diabetesportal.R;
 import com.wintersoldier.diabetesportal.bean.DataSet;
 import com.wintersoldier.diabetesportal.bean.SampleGroup;
 import com.wintersoldier.diabetesportal.bean.SampleGroupBean;
@@ -9,6 +12,7 @@ import com.wintersoldier.diabetesportal.bean.Phenotype;
 import com.wintersoldier.diabetesportal.bean.PhenotypeBean;
 import com.wintersoldier.diabetesportal.bean.Property;
 import com.wintersoldier.diabetesportal.bean.PropertyBean;
+import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeNameVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
@@ -17,7 +21,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Created by mduby on 7/29/15.
@@ -28,6 +37,8 @@ public class JsonParserService {
 
     // private cached results
     private List<Experiment> experimentList = null;
+    private Context context;                            // better to pass this in at method time, but gums up junit tests then
+    private String jsonString;
 
     /**
      * singleton service to parse metadata
@@ -51,7 +62,14 @@ public class JsonParserService {
         // check to see if the experiments are already loaded
         if (this.experimentList == null) {
             // load the json
-            this.experimentList = this.loadExperiments();
+            this.experimentList = new ArrayList<Experiment>();
+
+            try {
+                this.parseExperiments(this.experimentList);
+
+            } catch (PortalException exception) {
+                // TODO - message
+            }
         }
 
         // return
@@ -59,13 +77,42 @@ public class JsonParserService {
     }
 
     /**
+     * return all the disctint phneotype names in the metadata
+     *
+     * @return
+     */
+    public List<String> getAllDistinctPhenotypeNames() {
+        // instance variables
+        HashSet<String> hashSet = new HashSet<String>();
+        PhenotypeNameVisitor visitor = new PhenotypeNameVisitor();
+        List<String> nameList;
+
+        // go through tree and add in any phenotype names
+        for (Experiment experiment : this.getAllExperiments()) {
+            experiment.acceptVisitor(visitor);
+        }
+        hashSet = visitor.getResultSet();
+
+        // convert the set to a list
+        nameList = new ArrayList<String>();
+        nameList.addAll(hashSet);
+
+        // sort the list
+        Collections.sort(nameList);
+
+        // return the list
+        return nameList;
+    }
+
+
+    /**
      * load all the getMetadata experiment data
      *
      * @return
      */
-    protected List<Experiment> loadExperiments() {
+    protected List<Experiment> loadExperiments() throws PortalException {
         // instance variables
-        List<Experiment> experimentList = null;
+        List<Experiment> experimentList = new ArrayList<Experiment>();
         JSONObject jsonObject = null;
         JSONTokener tokener = null;
 
@@ -73,17 +120,30 @@ public class JsonParserService {
         tokener = new JSONTokener(this.getJsonMetadata());
 
         // parse the json
+        this.parseExperiments(experimentList);
 
         // return
         return experimentList;
     }
 
+    /**
+     * get the json metadata
+     *
+     * @return
+     */
     protected String getJsonMetadata() {
         // local variables
         String jsonString = null;
 
         // read the file
-        jsonString = "test";
+        if (this.context != null) {
+            InputStream inputStream = context.getResources().openRawResource(R.raw.metadata);
+            jsonString = new Scanner(inputStream).useDelimiter("\\A").next();
+
+        } else {
+            // TODO - mostly for junit testing sake; need to refactor
+            jsonString = (this.jsonString != null ? this.jsonString : "");
+        }
 
         // return
         return jsonString;
@@ -93,17 +153,20 @@ public class JsonParserService {
      * method to return a list of experiments from the json string
      *
      * @param experimentList                a not null experiment list
-     * @param jsonString                    a not null json string
      * @throws JSONException                if there are any errors
      */
-    protected void parseExperiments(List<Experiment> experimentList, String jsonString) throws PortalException {
+    protected void parseExperiments(List<Experiment> experimentList) throws PortalException {
         // local variables
         JSONTokener tokener;
         JSONObject rootJson, tempJson;
         JSONArray experimentArray, dataSetArray;
         SampleGroup sampleGroup;
+        String jsonString;
 
         try {
+            // get the json string
+            jsonString = this.getJsonMetadata();
+
             // create the tokener
             tokener = new JSONTokener(jsonString);
 
@@ -128,7 +191,7 @@ public class JsonParserService {
                 for (int j = 0; j < dataSetArray.length(); j++) {
                     // for each dataset, create a dataset object and add to experiment
                     sampleGroup = this.createDataSetFromJson(dataSetArray.getJSONObject(j), experiment);
-                    experiment.getDataSets().add(sampleGroup);
+                    experiment.getSampleGroups().add(sampleGroup);
                 }
             }
 
@@ -249,4 +312,12 @@ public class JsonParserService {
         final JSONArray jsonArray =  jsonObject.getJSONArray(key);
     }
     */
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    public void setJsonString(String jsonString) {
+        this.jsonString = jsonString;
+    }
 }

@@ -64,6 +64,7 @@ public class JsonParserServiceTest extends TestCase {
         assertNotNull(service);
     }
 
+    /*
     @Test
     public void testGetJsonMetadata() {
         String jsonMetadata = null;
@@ -73,6 +74,7 @@ public class JsonParserServiceTest extends TestCase {
         assertNotNull(jsonMetadata);
         assertTrue(jsonMetadata.length() > 0);
     }
+    */
 
     @Test
     public void testFileObjectShouldNotBeNull() throws Exception {
@@ -90,6 +92,7 @@ public class JsonParserServiceTest extends TestCase {
         // get the json strong to test
         try {
             jsonString = new Scanner( getFileFromPath(this, "res/metadata.json") ).useDelimiter("\\A").next();
+            this.jsonParserService.setJsonString(jsonString);
 
         } catch (FileNotFoundException exception) {
             fail("got file exception: " + exception.getMessage());
@@ -97,7 +100,7 @@ public class JsonParserServiceTest extends TestCase {
 
         // parse the experiments
         try {
-            this.jsonParserService.parseExperiments(experimentList, jsonString);
+            this.jsonParserService.parseExperiments(experimentList);
 
         } catch (PortalException exception) {
             fail("got json parsing exception: " + exception.getMessage());
@@ -111,10 +114,10 @@ public class JsonParserServiceTest extends TestCase {
         // test the children dataset
         Experiment experiment = experimentList.get(0);
         assertNotNull(experiment);
-        assertTrue(experiment.getDataSets().size() > 0);
+        assertTrue(experiment.getSampleGroups().size() > 0);
 
         // test the grandchildren datasets
-        SampleGroup sampleGroup = experiment.getDataSets().get(0);
+        SampleGroup sampleGroup = experiment.getSampleGroups().get(0);
         assertNotNull(sampleGroup);
         assertTrue(sampleGroup.getChildren().size() > 0);
         assertTrue(sampleGroup.getRecursiveChildren().size() > sampleGroup.getChildren().size());
@@ -123,6 +126,41 @@ public class JsonParserServiceTest extends TestCase {
         DataSet firstChild = sampleGroup.getChildren().get(0);
         assertNotNull(firstChild);
         assertNotNull(firstChild.getParent());
+
+    }
+
+    /**
+     * test the get phenotype name list
+     */
+    @Test
+    public void testgetAllDistinctPhenotypeNames() {
+        // local variables
+        List<Experiment> experimentList = new ArrayList<Experiment>();
+        String jsonString = null;
+        String simpleJsonString = "{\"experiments\": []}";
+
+        // get the json strong to test
+        try {
+            jsonString = new Scanner( getFileFromPath(this, "res/metadata.json") ).useDelimiter("\\A").next();
+            this.jsonParserService.setJsonString(jsonString);
+
+        } catch (FileNotFoundException exception) {
+            fail("got file exception: " + exception.getMessage());
+        }
+
+        // parse the experiments
+        try {
+            this.jsonParserService.parseExperiments(experimentList);
+
+        } catch (PortalException exception) {
+            fail("got json parsing exception: " + exception.getMessage());
+        }
+
+        // get the phenotype name list
+        List<String> nameList = this.jsonParserService.getAllDistinctPhenotypeNames();
+        assertNotNull(nameList);
+        assertTrue(nameList.size() > 0);
+        assertEquals(25, nameList.size());
 
     }
 }
