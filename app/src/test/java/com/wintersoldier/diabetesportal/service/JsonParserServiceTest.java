@@ -1,12 +1,16 @@
 package com.wintersoldier.diabetesportal.service;
 
 import com.wintersoldier.diabetesportal.bean.DataSet;
+import com.wintersoldier.diabetesportal.bean.MetaDataRoot;
 import com.wintersoldier.diabetesportal.bean.SampleGroup;
 import com.wintersoldier.diabetesportal.bean.Experiment;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
 import junit.framework.TestCase;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,19 +92,26 @@ public class JsonParserServiceTest extends TestCase {
         List<Experiment> experimentList = new ArrayList<Experiment>();
         String jsonString = null;
         String simpleJsonString = "{\"experiments\": []}";
+        JSONTokener tokener;
+        JSONObject rootJson = null;
 
         // get the json strong to test
         try {
             jsonString = new Scanner( getFileFromPath(this, "res/metadata.json") ).useDelimiter("\\A").next();
-            this.jsonParserService.setJsonString(jsonString);
+//            this.jsonParserService.setJsonString(jsonString);
+
+            tokener = new JSONTokener(jsonString);
+            rootJson = new JSONObject(tokener);
 
         } catch (FileNotFoundException exception) {
             fail("got file exception: " + exception.getMessage());
+        } catch (JSONException exception) {
+            fail("got json exception: " + exception.getMessage());
         }
 
         // parse the experiments
         try {
-            this.jsonParserService.parseExperiments(experimentList);
+            this.jsonParserService.parseExperiments(experimentList, rootJson);
 
         } catch (PortalException exception) {
             fail("got json parsing exception: " + exception.getMessage());
@@ -138,6 +149,9 @@ public class JsonParserServiceTest extends TestCase {
         List<Experiment> experimentList = new ArrayList<Experiment>();
         String jsonString = null;
         String simpleJsonString = "{\"experiments\": []}";
+        JSONTokener tokener;
+        JSONObject rootJson = null;
+        List<String> nameList = null;
 
         // get the json strong to test
         try {
@@ -148,16 +162,13 @@ public class JsonParserServiceTest extends TestCase {
             fail("got file exception: " + exception.getMessage());
         }
 
-        // parse the experiments
+        // get the phenotype name list
         try {
-            this.jsonParserService.parseExperiments(experimentList);
+            nameList = this.jsonParserService.getAllDistinctPhenotypeNames();
 
         } catch (PortalException exception) {
-            fail("got json parsing exception: " + exception.getMessage());
+            fail("Got portal exception: " + exception.getMessage());
         }
-
-        // get the phenotype name list
-        List<String> nameList = this.jsonParserService.getAllDistinctPhenotypeNames();
         assertNotNull(nameList);
         assertTrue(nameList.size() > 0);
         assertEquals(29, nameList.size());
@@ -173,6 +184,9 @@ public class JsonParserServiceTest extends TestCase {
         List<Experiment> experimentList = new ArrayList<Experiment>();
         String jsonString = null;
         String phenotype = "T2D";
+        JSONTokener tokener;
+        JSONObject rootJson = null;
+        List<String> nameList = null;
 
         // get the json strong to test
         try {
@@ -183,21 +197,50 @@ public class JsonParserServiceTest extends TestCase {
             fail("got file exception: " + exception.getMessage());
         }
 
-        // parse the experiments
+        // get the phenotype name list
         try {
-            this.jsonParserService.parseExperiments(experimentList);
+            nameList = this.jsonParserService.getSamplesGroupsForPhenotype(phenotype);
 
         } catch (PortalException exception) {
-            fail("got json parsing exception: " + exception.getMessage());
+            fail("Got portal exception: " + exception.getMessage());
         }
-
-        // get the phenotype name list
-        List<String> nameList = this.jsonParserService.getSamplesGroupsForPhenotype(phenotype);
         assertNotNull(nameList);
         assertTrue(nameList.size() > 0);
         assertEquals(69, nameList.size());
 
     }
 
+    @Test
+    public void testGetMetaDataRoot() {
+        // local variables
+        String jsonString = null;
+        MetaDataRoot metaData = null;
+
+        // get the json strong to test
+        try {
+            jsonString = new Scanner( getFileFromPath(this, "res/metadata.json") ).useDelimiter("\\A").next();
+            this.jsonParserService.setJsonString(jsonString);
+
+        } catch (FileNotFoundException exception) {
+            fail("got file exception: " + exception.getMessage());
+        }
+
+        // get the phenotype name list
+        try {
+            metaData = this.jsonParserService.getMetaDataRoot();
+
+        } catch (PortalException exception) {
+            fail("Got portal exception: " + exception.getMessage());
+        }
+
+        // test
+        assertNotNull(metaData);
+        assertNotNull(metaData.getExperiments());
+        assertNotNull(metaData.getProperties());
+        assertTrue(metaData.getExperiments().size() > 0);
+        assertTrue(metaData.getProperties().size() > 0);
+        assertEquals(25, metaData.getExperiments().size());
+        assertEquals(13, metaData.getProperties().size());
+    }
 
 }

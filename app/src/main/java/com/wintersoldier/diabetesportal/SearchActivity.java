@@ -11,7 +11,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.wintersoldier.diabetesportal.service.JsonParserService;
+import com.wintersoldier.diabetesportal.util.PortalException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -37,9 +39,15 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
     protected void displaySpinner() {
         // populate the spinner
         Spinner spinner = (Spinner) this.findViewById(R.id.search_phenotype_spinner);
+        List<String> phenotypeList = new ArrayList<String>();
 
         // get the list of phenotypes
-        List<String>  phenotypeList = this.getJsonService().getAllDistinctPhenotypeNames();
+        try {
+            phenotypeList = this.getJsonService().getAllDistinctPhenotypeNames();
+
+        } catch (PortalException exception) {
+            Log.e(this.getClass().getName(), "Got exception getting phenotype names: " + exception.getMessage());
+        }
 
         // log
         Log.v(this.getClass().getName(), "got phenotype list of size: " + phenotypeList.size());
@@ -99,15 +107,26 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
      */
     protected void actOnSelectedPhenotype(int position) {
         // local variables
-        String selectedPhenotype;
-        List<String> sampleGroupList;
+        String selectedPhenotype = null;
+        List<String> sampleGroupList = new ArrayList<String>();
 
         // get the selected phenotype
-        selectedPhenotype = this.getJsonService().getAllDistinctPhenotypeNames().get(position);
+        try {
+            selectedPhenotype = this.getJsonService().getAllDistinctPhenotypeNames().get(position);
+
+        } catch (PortalException exception) {
+            Log.e(this.getClass().getName(), "Got exception getting phenotype names: " + exception.getMessage());
+        }
+
         Log.i(this.getClass().getName(), "Got selected phenotype: " + selectedPhenotype);
 
         // retrieve the sample groups which contain this phenotype
-        sampleGroupList = this.getJsonService().getSamplesGroupsForPhenotype(selectedPhenotype);
+        try {
+            sampleGroupList = this.getJsonService().getSamplesGroupsForPhenotype(selectedPhenotype);
+
+        } catch (PortalException exception) {
+            Log.e(this.getClass().getName(), "Got exception getting phenotype names: " + exception.getMessage());
+        }
 
         // populate the spinner of sample groups
         Spinner sampleGroupSpinner = (Spinner)this.findViewById(R.id.search_sample_group_spinner);

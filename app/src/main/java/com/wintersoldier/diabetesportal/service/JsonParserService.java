@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.wintersoldier.diabetesportal.R;
 import com.wintersoldier.diabetesportal.bean.DataSet;
+import com.wintersoldier.diabetesportal.bean.MetaDataRoot;
+import com.wintersoldier.diabetesportal.bean.MetaDataRootBean;
 import com.wintersoldier.diabetesportal.bean.SampleGroup;
 import com.wintersoldier.diabetesportal.bean.SampleGroupBean;
 import com.wintersoldier.diabetesportal.bean.Experiment;
@@ -39,7 +41,7 @@ public class JsonParserService {
     private static JsonParserService service;
 
     // private cached results
-    private List<Experiment> experimentList = null;
+    private MetaDataRoot metaDataRoot = null;
     private Context context;                            // better to pass this in at method time, but gums up junit tests then
     private String jsonString;
 
@@ -61,14 +63,17 @@ public class JsonParserService {
      *
      * @return                  all the experiments in the metadata chache
      */
+    /*
     public List<Experiment> getAllExperiments() {
         // check to see if the experiments are already loaded
-        if (this.experimentList == null) {
+        if (this.metaDataRoot == null) {
             // load the json
-            this.experimentList = new ArrayList<Experiment>();
+            this.metaDataRoot = new MetaDataRootBean();
 
             try {
-                this.parseExperiments(this.experimentList);
+                // get the metadata root experiment
+                this.parseExperiments(this.metaDataRoot.getExperiments());
+
 
             } catch (PortalException exception) {
                 // TODO - message
@@ -77,7 +82,60 @@ public class JsonParserService {
         }
 
         // return
-        return this.experimentList;
+        return this.metaDataRootBean.getExperiments();
+    }
+    */
+
+    /**
+     * returns the root object containing the parsed json onformation
+     *
+     * @return
+     */
+    public MetaDataRoot getMetaDataRoot() throws PortalException {
+        if (this.metaDataRoot == null) {
+            // create a new metadata root object
+            this.metaDataRoot = this.populateMetaDataRoot();
+        }
+
+        return metaDataRoot;
+    }
+
+    protected MetaDataRoot populateMetaDataRoot() throws PortalException {
+        // local variables
+        String jsonString;
+        JSONTokener tokener;
+        JSONObject rootJson;
+        MetaDataRootBean metaDataBean = new MetaDataRootBean();
+        JSONArray tempArray;
+        Property tempProperty;
+
+        // parse the json
+        try {
+            // get the json string
+            jsonString = this.getJsonMetadata();
+
+            // create the tokener
+            tokener = new JSONTokener(jsonString);
+
+            // create the json object from the string
+            rootJson = new JSONObject(tokener);
+
+            // parse the experiments
+            this.parseExperiments(metaDataBean.getExperiments(), rootJson);
+
+            // parse the common properties
+            // get the sub properties
+            tempArray = rootJson.getJSONArray(PortalConstants.JSON_PROPERTIES_KEY);
+            for (int i = 0; i < tempArray.length(); i++) {
+                tempProperty = this.createPropertyFromJson(tempArray.getJSONObject(i), metaDataBean);
+                metaDataBean.getProperties().add(tempProperty);
+            }
+
+        } catch (JSONException exception) {
+            throw new PortalException("Got error creating metadata root: " + exception.getMessage());
+        }
+
+        return metaDataBean;
     }
 
     /**
@@ -85,14 +143,14 @@ public class JsonParserService {
      *
      * @return
      */
-    public List<String> getAllDistinctPhenotypeNames() {
+    public List<String> getAllDistinctPhenotypeNames() throws PortalException {
         // instance variables
         HashSet<String> hashSet = new HashSet<String>();
         PhenotypeNameVisitor visitor = new PhenotypeNameVisitor();
         List<String> nameList;
 
         // go through tree and add in any phenotype names
-        for (Experiment experiment : this.getAllExperiments()) {
+        for (Experiment experiment : this.getMetaDataRoot().getExperiments()) {
             experiment.acceptVisitor(visitor);
         }
         hashSet = visitor.getResultSet();
@@ -114,6 +172,7 @@ public class JsonParserService {
      *
      * @return
      */
+    /*
     protected List<Experiment> loadExperiments() throws PortalException {
         // instance variables
         List<Experiment> experimentList = new ArrayList<Experiment>();
@@ -129,6 +188,7 @@ public class JsonParserService {
         // return
         return experimentList;
     }
+    */
 
     /**
      * get the json metadata
@@ -159,28 +219,17 @@ public class JsonParserService {
      * @param experimentList                a not null experiment list
      * @throws JSONException                if there are any errors
      */
-    protected void parseExperiments(List<Experiment> experimentList) throws PortalException {
+    protected void parseExperiments(List<Experiment> experimentList, JSONObject rootJson) throws PortalException {
         // local variables
-        JSONTokener tokener;
-        JSONObject rootJson, tempJson;
+        JSONObject tempJson;
         JSONArray experimentArray, dataSetArray;
         SampleGroup sampleGroup;
-        String jsonString;
 
         try {
-            // get the json string
-            jsonString = this.getJsonMetadata();
-
-            // create the tokener
-            tokener = new JSONTokener(jsonString);
-
-            // create the json object from the string
-            rootJson = new JSONObject(tokener);
-
             // get the array of experiments
             experimentArray = rootJson.getJSONArray(PortalConstants.JSON_EXPERIMENT_KEY);
 
-            // reinitialize the list
+            // reinitialize the experiment list
             experimentList.clear();
 
             // build the experiments
@@ -188,6 +237,8 @@ public class JsonParserService {
                 tempJson = experimentArray.getJSONObject(i);
                 ExperimentBean experiment = new ExperimentBean();
                 experiment.setName(tempJson.getString(PortalConstants.JSON_NAME_KEY));
+                experiment.setTechnology(tempJson.getString(PortalConstants.JSON_TECHNOLOGY_KEY));
+                experiment.setVersion(tempJson.getString(PortalConstants.JSON_VERSION_KEY));
                 experimentList.add(experiment);
 
                 // look for sample groups
@@ -319,13 +370,13 @@ public class JsonParserService {
      * @param phenotypeName
      * @return
      */
-    public List<String> getSamplesGroupsForPhenotype(String phenotypeName) {
+    public List<String> getSamplesGroupsForPhenotype(String phenotypeName) throws PortalException {
         // local variables
         SampleGroupForPhenotypeVisitor sampleGroupVisitor = new SampleGroupForPhenotypeVisitor(phenotypeName);
         List<String> sampleGroupNameList;
 
         // pass in visitor looking for sample groups with the selected phenotype
-        for (Experiment experiment: this.getAllExperiments()) {
+        for (Experiment experiment: this.getMetaDataRoot().getExperiments()) {
             experiment.acceptVisitor(sampleGroupVisitor);
         }
 
