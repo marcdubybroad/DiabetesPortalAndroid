@@ -39,21 +39,25 @@ public class SampleGroupForPhenotypeVisitor implements DataSetVisitor {
             for (Phenotype phenotype: group.getPhenotypes()) {
                 // if contained, then add sample group name to list
                 if (phenotype.getName().equalsIgnoreCase(this.phenotypeName)) {
-                    this.sampleGroupNameList.add(group.getName());
+                    this.sampleGroupNameList.add(group.getSystemId());
                     break;
                 }
             }
 
             // visit children sample groups
+            /*
             for (SampleGroup childGroup: group.getChildren()) {
                 childGroup.acceptVisitor(this);
             }
+            */
 
         // if the data set is an experiment
+            /*
         } else if (dataSet.getType() == PortalConstants.TYPE_EXPERIMENT_KEY) {
             for (SampleGroup childGroup: ((Experiment)dataSet).getSampleGroups()) {
                 childGroup.acceptVisitor(this);
             }
+            */
         }
 
     }

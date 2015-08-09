@@ -27,4 +27,6 @@ public interface SampleGroup extends DataSet {
 
     public int getSortOrder();
 
+    public String getSystemId();
+
 }

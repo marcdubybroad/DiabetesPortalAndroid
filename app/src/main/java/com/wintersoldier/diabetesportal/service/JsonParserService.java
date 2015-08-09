@@ -224,6 +224,7 @@ public class JsonParserService {
             // create the object and add the primitive variables
             sampleGroup.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
             sampleGroup.setAncestry(jsonObject.getString(PortalConstants.JSON_ANCESTRY_KEY));
+            sampleGroup.setSystemId(jsonObject.getString(PortalConstants.JSON_ID_KEY));
             sampleGroup.setParent(parent);
 
             // add in properties

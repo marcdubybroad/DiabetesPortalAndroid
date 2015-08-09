@@ -18,6 +18,7 @@ public class SampleGroupBean implements SampleGroup {
     private List<Phenotype> phenotypeList;
     private int sortOrder;
     private DataSet parent;
+    private String systemId;
 
     public void setName(String name) {
         this.name = name;
@@ -132,6 +133,17 @@ public class SampleGroupBean implements SampleGroup {
         for (Phenotype phenotype : this.getPhenotypes()) {
             phenotype.acceptVisitor(visitor);
         }
+
+        for (SampleGroup group: this.getChildren()) {
+            group.acceptVisitor(visitor);
+        }
     }
 
+    public String getSystemId() {
+        return systemId;
+    }
+
+    public void setSystemId(String systemId) {
+        this.systemId = systemId;
+    }
 }

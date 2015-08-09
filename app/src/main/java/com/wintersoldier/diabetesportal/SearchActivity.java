@@ -100,14 +100,27 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
     protected void actOnSelectedPhenotype(int position) {
         // local variables
         String selectedPhenotype;
+        List<String> sampleGroupList;
 
         // get the selected phenotype
         selectedPhenotype = this.getJsonService().getAllDistinctPhenotypeNames().get(position);
         Log.i(this.getClass().getName(), "Got selected phenotype: " + selectedPhenotype);
 
         // retrieve the sample groups which contain this phenotype
+        sampleGroupList = this.getJsonService().getSamplesGroupsForPhenotype(selectedPhenotype);
 
-        // populate the spinner of sampel groups
+        // populate the spinner of sample groups
+        Spinner sampleGroupSpinner = (Spinner)this.findViewById(R.id.search_sample_group_spinner);
+
+        // create the array
+        ArrayAdapter<String> adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, sampleGroupList);
+
+        // set the adapter on the spinner
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sampleGroupSpinner.setAdapter(adapter);
+
+        // add this activity as listener
+        sampleGroupSpinner.setOnItemSelectedListener(this);
 
     }
 

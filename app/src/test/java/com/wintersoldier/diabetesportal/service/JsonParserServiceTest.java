@@ -160,7 +160,7 @@ public class JsonParserServiceTest extends TestCase {
         List<String> nameList = this.jsonParserService.getAllDistinctPhenotypeNames();
         assertNotNull(nameList);
         assertTrue(nameList.size() > 0);
-        assertEquals(25, nameList.size());
+        assertEquals(29, nameList.size());
 
     }
 
@@ -195,7 +195,7 @@ public class JsonParserServiceTest extends TestCase {
         List<String> nameList = this.jsonParserService.getSamplesGroupsForPhenotype(phenotype);
         assertNotNull(nameList);
         assertTrue(nameList.size() > 0);
-        assertEquals(25, nameList.size());
+        assertEquals(69, nameList.size());
 
     }
 
