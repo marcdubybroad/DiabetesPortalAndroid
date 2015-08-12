@@ -2,6 +2,7 @@ package com.wintersoldier.diabetesportal.service;
 
 import com.wintersoldier.diabetesportal.bean.DataSet;
 import com.wintersoldier.diabetesportal.bean.MetaDataRoot;
+import com.wintersoldier.diabetesportal.bean.MetaDataRootBean;
 import com.wintersoldier.diabetesportal.bean.SampleGroup;
 import com.wintersoldier.diabetesportal.bean.Experiment;
 import com.wintersoldier.diabetesportal.util.PortalException;
@@ -94,6 +95,7 @@ public class JsonParserServiceTest extends TestCase {
         String simpleJsonString = "{\"experiments\": []}";
         JSONTokener tokener;
         JSONObject rootJson = null;
+        MetaDataRootBean rootBean = new MetaDataRootBean();
 
         // get the json strong to test
         try {
@@ -111,7 +113,7 @@ public class JsonParserServiceTest extends TestCase {
 
         // parse the experiments
         try {
-            this.jsonParserService.parseExperiments(experimentList, rootJson);
+            this.jsonParserService.parseExperiments(experimentList, rootJson, rootBean);
 
         } catch (PortalException exception) {
             fail("got json parsing exception: " + exception.getMessage());
@@ -130,11 +132,11 @@ public class JsonParserServiceTest extends TestCase {
         // test the grandchildren datasets
         SampleGroup sampleGroup = experiment.getSampleGroups().get(0);
         assertNotNull(sampleGroup);
-        assertTrue(sampleGroup.getChildren().size() > 0);
-        assertTrue(sampleGroup.getRecursiveChildren().size() > sampleGroup.getChildren().size());
+        assertTrue(sampleGroup.getSampleGroups().size() > 0);
+        assertTrue(sampleGroup.getRecursiveChildren().size() > sampleGroup.getSampleGroups().size());
 
         // get first child of sampe group; make sure it has parent
-        DataSet firstChild = sampleGroup.getChildren().get(0);
+        DataSet firstChild = sampleGroup.getSampleGroups().get(0);
         assertNotNull(firstChild);
         assertNotNull(firstChild.getParent());
 

@@ -17,7 +17,9 @@ import com.wintersoldier.diabetesportal.bean.Property;
 import com.wintersoldier.diabetesportal.bean.PropertyBean;
 import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeNameVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.SampleGroupByIdSelectingVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.SampleGroupForPhenotypeVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.SearchablePropertyVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
@@ -42,8 +44,8 @@ public class JsonParserService {
 
     // private cached results
     private MetaDataRoot metaDataRoot = null;
-    private Context context;                            // better to pass this in at method time, but gums up junit tests then
     private String jsonString;
+    private Context context;                            // better to pass this in at method time, but gums up junit tests then
 
     /**
      * singleton service to parse metadata
@@ -121,7 +123,7 @@ public class JsonParserService {
             rootJson = new JSONObject(tokener);
 
             // parse the experiments
-            this.parseExperiments(metaDataBean.getExperiments(), rootJson);
+            this.parseExperiments(metaDataBean.getExperiments(), rootJson, metaDataBean);
 
             // parse the common properties
             // get the sub properties
@@ -168,58 +170,25 @@ public class JsonParserService {
 
 
     /**
-     * load all the getMetadata experiment data
-     *
-     * @return
-     */
-    /*
-    protected List<Experiment> loadExperiments() throws PortalException {
-        // instance variables
-        List<Experiment> experimentList = new ArrayList<Experiment>();
-        JSONObject jsonObject = null;
-        JSONTokener tokener = null;
-
-        // get the json
-        tokener = new JSONTokener(this.getJsonMetadata());
-
-        // parse the json
-        this.parseExperiments(experimentList);
-
-        // return
-        return experimentList;
-    }
-    */
-
-    /**
      * get the json metadata
      *
      * @return
      */
-    protected String getJsonMetadata() {
-        // local variables
-        String jsonString = null;
-
-        // read the file
-        if (this.context != null) {
-            InputStream inputStream = context.getResources().openRawResource(R.raw.metadata);
-            jsonString = new Scanner(inputStream).useDelimiter("\\A").next();
-
-        } else {
-            // TODO - mostly for junit testing sake; need to refactor
-            jsonString = (this.jsonString != null ? this.jsonString : "");
+    protected String getJsonMetadata() throws PortalException {
+        if (this.jsonString == null) {
+            throw new PortalException("the metadata json string has not been set");
         }
 
-        // return
-        return jsonString;
+        return this.jsonString;
     }
 
     /**
      * method to return a list of experiments from the json string
      *
      * @param experimentList                a not null experiment list
-     * @throws JSONException                if there are any errors
+     * @throws PortalException              if there are any errors
      */
-    protected void parseExperiments(List<Experiment> experimentList, JSONObject rootJson) throws PortalException {
+    protected void parseExperiments(List<Experiment> experimentList, JSONObject rootJson, DataSet parent) throws PortalException {
         // local variables
         JSONObject tempJson;
         JSONArray experimentArray, dataSetArray;
@@ -240,12 +209,13 @@ public class JsonParserService {
                 experiment.setTechnology(tempJson.getString(PortalConstants.JSON_TECHNOLOGY_KEY));
                 experiment.setVersion(tempJson.getString(PortalConstants.JSON_VERSION_KEY));
                 experimentList.add(experiment);
+                experiment.setParent(parent);
 
                 // look for sample groups
                 dataSetArray = tempJson.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
                 for (int j = 0; j < dataSetArray.length(); j++) {
                     // for each dataset, create a dataset object and add to experiment
-                    sampleGroup = this.createDataSetFromJson(dataSetArray.getJSONObject(j), experiment);
+                    sampleGroup = this.createSampleGroupFromJson(dataSetArray.getJSONObject(j), experiment);
                     experiment.getSampleGroups().add(sampleGroup);
                 }
             }
@@ -263,7 +233,7 @@ public class JsonParserService {
      * @return
      * @throws PortalException
      */
-    protected SampleGroup createDataSetFromJson(JSONObject jsonObject, DataSet parent) throws PortalException {
+    protected SampleGroup createSampleGroupFromJson(JSONObject jsonObject, DataSet parent) throws PortalException {
         // local variables
         SampleGroupBean sampleGroup = new SampleGroupBean();
         JSONArray tempArray;
@@ -295,8 +265,8 @@ public class JsonParserService {
             // recursively add in any other child sample groups
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_DATASETS_KEY);
             for (int i = 0; i < tempArray.length(); i++) {
-                tempSampleGroup = this.createDataSetFromJson(tempArray.getJSONObject(i), sampleGroup);
-                sampleGroup.getChildren().add(tempSampleGroup);
+                tempSampleGroup = this.createSampleGroupFromJson(tempArray.getJSONObject(i), sampleGroup);
+                sampleGroup.getSampleGroups().add(tempSampleGroup);
             }
 
         } catch (JSONException exception) {
@@ -318,7 +288,8 @@ public class JsonParserService {
         // local variables
         PropertyBean property = new PropertyBean();
         String tempJsonValue;
-        
+        int tempJsonInt;
+
         // get values and put in new object
         try {
             property.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
@@ -327,9 +298,9 @@ public class JsonParserService {
             if (tempJsonValue != null) {
                 property.setSearchable(Boolean.valueOf(tempJsonValue));
             }
-            tempJsonValue = jsonObject.getString(PortalConstants.JSON_SORT_ORDER_KEY);
+            tempJsonInt = jsonObject.getInt(PortalConstants.JSON_SORT_ORDER_KEY);
             if (tempJsonValue != null) {
-                property.setSortOrder(Integer.valueOf(tempJsonValue));
+                property.setSortOrder(tempJsonInt);
             }
             property.setParent(parent);
 
@@ -367,7 +338,7 @@ public class JsonParserService {
             }
 
         } catch (JSONException exception) {
-            throw new PortalException("Got phenotype parsign error: " + exception.getMessage());
+            throw new PortalException("Got phenotype parsing error: " + exception.getMessage());
         }
 
         return phenotype;
@@ -397,17 +368,53 @@ public class JsonParserService {
         return sampleGroupNameList;
     }
 
+    /**
+     * returns the list of searchable properties for a given sample group id
+     *
+     * @param sampleGroupId
+     * @return
+     * @throws PortalException
+     */
+    public List<Property> getSearchablePropertiesForSampleGroupId(String sampleGroupId) throws PortalException {
+        // local variables
+        List<Property> propertyList = new ArrayList<Property>();
+        SampleGroup sampleGroup;
+
+        // find the sample group
+        // create the visitor
+        SampleGroupByIdSelectingVisitor finderVisitor = new SampleGroupByIdSelectingVisitor(sampleGroupId);
+
+        // visit the metadata root
+        this.getMetaDataRoot().acceptVisitor(finderVisitor);
+        sampleGroup = finderVisitor.getSampleGroup();
+
+        // get the list of searchable properties for the sample group
+        if (sampleGroup != null) {
+            // create new searchable property visitor
+            SearchablePropertyVisitor propertyVisitor = new SearchablePropertyVisitor();
+
+            // visit the sample group
+            sampleGroup.acceptVisitor(propertyVisitor);
+
+            // get the list back
+            propertyList = propertyVisitor.getPropertyList();
+        }
+
+        // return the list
+        return propertyList;
+    }
+
     /*
     protected JSONArray extractArrayFromJson(final JSONObject jsonObject, final String key) throws JSONException {
         final JSONArray jsonArray =  jsonObject.getJSONArray(key);
     }
     */
 
-    public void setContext(Context context) {
-        this.context = context;
-    }
-
     public void setJsonString(String jsonString) {
         this.jsonString = jsonString;
+    }
+
+    public void setContext(Context context) {
+        this.context = context;
     }
 }

@@ -44,12 +44,30 @@ public class SampleGroupBean implements SampleGroup {
         return this.parent;
     }
 
-    public List<SampleGroup> getChildren() {
+    public List<SampleGroup> getSampleGroups() {
         if (this.sampleGroupList == null) {
             this.sampleGroupList = new ArrayList<SampleGroup>();
         }
 
         return this.sampleGroupList;
+    }
+
+    /**
+     * return a list of all the object's dataset children
+     *
+     * @return
+     */
+    public List<DataSet> getAllChildren() {
+        // local variable
+        List<DataSet> allChildrenList = new ArrayList<DataSet>();
+
+        // add all children lists
+        allChildrenList.addAll(this.getSampleGroups());
+        allChildrenList.addAll(this.getPhenotypes());
+        allChildrenList.addAll(this.getProperties());
+
+        // return the resulting list
+        return allChildrenList;
     }
 
     public void setParent(DataSet parent) {
@@ -60,7 +78,7 @@ public class SampleGroupBean implements SampleGroup {
     public List<SampleGroup> getRecursiveChildren() {
         // create a new list from the direct children
         List<SampleGroup> tempList = new ArrayList<SampleGroup>();
-        tempList.addAll(this.getChildren());
+        tempList.addAll(this.getSampleGroups());
 
         // add in the children's children
         for (SampleGroup sampleGroup : this.sampleGroupList) {
@@ -125,18 +143,6 @@ public class SampleGroupBean implements SampleGroup {
      */
     public void acceptVisitor(DataSetVisitor visitor) {
         visitor.visit(this);
-
-        for (Property property: this.getProperties()) {
-            property.acceptVisitor(visitor);
-        }
-
-        for (Phenotype phenotype : this.getPhenotypes()) {
-            phenotype.acceptVisitor(visitor);
-        }
-
-        for (SampleGroup group: this.getChildren()) {
-            group.acceptVisitor(visitor);
-        }
     }
 
     public String getSystemId() {

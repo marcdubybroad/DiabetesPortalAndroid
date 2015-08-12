@@ -3,6 +3,9 @@ package com.wintersoldier.diabetesportal.bean;
 import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by mduby on 8/3/15.
  */
@@ -99,4 +102,13 @@ public class PropertyBean implements Property {
         visitor.visit(this);
     }
 
+    /**
+     * return a list of all the object's dataset children
+     *
+     * @return
+     */
+    public List<DataSet> getAllChildren() {
+        // return the resulting list (empty list)
+        return new ArrayList<DataSet>();
+    }
 }

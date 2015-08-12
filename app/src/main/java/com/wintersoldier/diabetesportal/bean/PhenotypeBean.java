@@ -96,10 +96,21 @@ public class PhenotypeBean implements Phenotype, Comparable {
      */
     public void acceptVisitor(DataSetVisitor visitor) {
         visitor.visit(this);
-
-        for (Property property: this.getProperties()) {
-            property.acceptVisitor(visitor);
-        }
     }
 
+    /**
+     * return a list of all the object's dataset children
+     *
+     * @return
+     */
+    public List<DataSet> getAllChildren() {
+        // local variable
+        List<DataSet> allChildrenList = new ArrayList<DataSet>();
+
+        // add all children lists
+        allChildrenList.addAll(this.getProperties());
+
+        // return the resulting list
+        return allChildrenList;
+    }
 }

@@ -50,18 +50,27 @@ public class MetaDataRootBean implements MetaDataRoot {
     @Override
     public void acceptVisitor(DataSetVisitor visitor) {
         visitor.visit(this);
-
-        for (Experiment experiment: this.getExperiments()) {
-            experiment.acceptVisitor(visitor);
-        }
-
-        for (Property property: this.getProperties()) {
-            property.acceptVisitor(visitor);
-        }
     }
 
     @Override
     public String getName() {
         return this.getId();
+    }
+
+    /**
+     * return a list of all the object's dataset children
+     *
+     * @return
+     */
+    public List<DataSet> getAllChildren() {
+        // local variable
+        List<DataSet> allChildrenList = new ArrayList<DataSet>();
+
+        // add all children lists
+        allChildrenList.addAll(this.getExperiments());
+        allChildrenList.addAll(this.getProperties());
+
+        // return the resulting list
+        return allChildrenList;
     }
 }

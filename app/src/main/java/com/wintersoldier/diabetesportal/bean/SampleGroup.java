@@ -7,7 +7,7 @@ import java.util.List;
  */
 public interface SampleGroup extends DataSet {
 
-    public List<SampleGroup> getChildren();
+    public List<SampleGroup> getSampleGroups();
 
     public List<SampleGroup> getRecursiveChildren();
 

@@ -46,7 +46,7 @@ public class SampleGroupForPhenotypeVisitor implements DataSetVisitor {
 
             // visit children sample groups
             /*
-            for (SampleGroup childGroup: group.getChildren()) {
+            for (SampleGroup childGroup: group.getSampleGroups()) {
                 childGroup.acceptVisitor(this);
             }
             */
