@@ -317,11 +317,20 @@ public class JsonParserService {
     protected Property createPropertyFromJson(JSONObject jsonObject, DataSet parent) throws PortalException {
         // local variables
         PropertyBean property = new PropertyBean();
-
+        String tempJsonValue;
+        
         // get values and put in new object
         try {
             property.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
             property.setVariableType(jsonObject.getString(PortalConstants.JSON_TYPE_KEY));
+            tempJsonValue = jsonObject.getString(PortalConstants.JSON_SEARCHABLE_KEY);
+            if (tempJsonValue != null) {
+                property.setSearchable(Boolean.valueOf(tempJsonValue));
+            }
+            tempJsonValue = jsonObject.getString(PortalConstants.JSON_SORT_ORDER_KEY);
+            if (tempJsonValue != null) {
+                property.setSortOrder(Integer.valueOf(tempJsonValue));
+            }
             property.setParent(parent);
 
         } catch (JSONException exception) {
