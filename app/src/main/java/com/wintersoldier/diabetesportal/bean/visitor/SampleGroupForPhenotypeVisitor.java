@@ -43,21 +43,10 @@ public class SampleGroupForPhenotypeVisitor implements DataSetVisitor {
                     break;
                 }
             }
+        }
 
-            // visit children sample groups
-            /*
-            for (SampleGroup childGroup: group.getSampleGroups()) {
-                childGroup.acceptVisitor(this);
-            }
-            */
-
-        // if the data set is an experiment
-            /*
-        } else if (dataSet.getType() == PortalConstants.TYPE_EXPERIMENT_KEY) {
-            for (SampleGroup childGroup: ((Experiment)dataSet).getSampleGroups()) {
-                childGroup.acceptVisitor(this);
-            }
-            */
+        for (DataSet child : dataSet.getAllChildren()) {
+            child.acceptVisitor(this);
         }
 
     }

@@ -14,8 +14,15 @@ public class PhenotypeNameVisitor implements DataSetVisitor {
 
     @Override
     public void visit(DataSet dataSet) {
+        // if phenotype, then add name
         if (dataSet.getType() == PortalConstants.TYPE_PHENOTYPE_KEY) {
             this.phenotypNameSet.add(dataSet.getName());
+
+            // if not, then only look at children if not property (leaf node)
+        } else if (dataSet.getType() != PortalConstants.TYPE_PROPERTY_KEY) {
+            for (DataSet child : dataSet.getAllChildren()) {
+                child.acceptVisitor(this);
+            }
         }
     }
 
