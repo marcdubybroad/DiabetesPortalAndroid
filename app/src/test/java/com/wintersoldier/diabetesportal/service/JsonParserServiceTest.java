@@ -5,6 +5,7 @@ import com.wintersoldier.diabetesportal.bean.MetaDataRoot;
 import com.wintersoldier.diabetesportal.bean.MetaDataRootBean;
 import com.wintersoldier.diabetesportal.bean.SampleGroup;
 import com.wintersoldier.diabetesportal.bean.Experiment;
+import com.wintersoldier.diabetesportal.util.PortalConstants;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
 import junit.framework.TestCase;
@@ -188,7 +189,7 @@ public class JsonParserServiceTest extends TestCase {
         String phenotype = "T2D";
         JSONTokener tokener;
         JSONObject rootJson = null;
-        List<String> nameList = null;
+        List<SampleGroup> groupList = null;
 
         // get the json strong to test
         try {
@@ -201,14 +202,14 @@ public class JsonParserServiceTest extends TestCase {
 
         // get the phenotype name list
         try {
-            nameList = this.jsonParserService.getSamplesGroupsForPhenotype(phenotype);
+            groupList = this.jsonParserService.getSamplesGroupsForPhenotype(phenotype, PortalConstants.DATASET_VERSION_2_KEY);
 
         } catch (PortalException exception) {
             fail("Got portal exception: " + exception.getMessage());
         }
-        assertNotNull(nameList);
-        assertTrue(nameList.size() > 0);
-        assertEquals(69, nameList.size());
+        assertNotNull(groupList);
+        assertTrue(groupList.size() > 0);
+        assertEquals(29, groupList.size());
 
     }
 

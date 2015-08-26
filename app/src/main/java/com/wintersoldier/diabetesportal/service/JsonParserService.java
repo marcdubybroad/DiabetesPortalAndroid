@@ -16,10 +16,17 @@ import com.wintersoldier.diabetesportal.bean.PhenotypeBean;
 import com.wintersoldier.diabetesportal.bean.Property;
 import com.wintersoldier.diabetesportal.bean.PropertyBean;
 import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.ExperimentByVersionVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeByNameVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeNameVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.PropertyByNameFinderVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.PropertyPerExperimentVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.SampleGroupByIdSelectingVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.SampleGroupForPhenotypeVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.SearchableCommonPropertyVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.SearchablePropertyIncludingChildrenVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.SearchablePropertyVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.TechSampleGroupByPhenotypeVisitor;
 import com.wintersoldier.diabetesportal.util.PortalConstants;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
@@ -102,6 +109,22 @@ public class JsonParserService {
         return metaDataRoot;
     }
 
+    /**
+     * force a reload of the metadata, normally after having reset the metadata string to parse
+     *
+     * @throws PortalException
+     */
+    public void forceMetadataReload(String jsonString) throws PortalException {
+        this.jsonString = jsonString;
+        this.metaDataRoot = this.populateMetaDataRoot();
+    }
+
+    /**
+     * create and populate the metadata root object from the given json string
+     *
+     * @return
+     * @throws PortalException
+     */
     protected MetaDataRoot populateMetaDataRoot() throws PortalException {
         // local variables
         String jsonString;
@@ -141,7 +164,7 @@ public class JsonParserService {
     }
 
     /**
-     * return all the disctint phneotype names in the metadata
+     * return all the distinct phenotype names in the metadata
      *
      * @return
      */
@@ -168,6 +191,52 @@ public class JsonParserService {
         return nameList;
     }
 
+    public List<Property> getAllPropertiesWithNameForExperimentOfVersion(String propertyName, String version, String technology) throws PortalException {
+        List<Property> propertyList = new ArrayList<Property>();
+        List<Experiment> experimentList;
+        List<Property> finalPropertyList = new ArrayList<Property>();
+
+        // find the experiment
+        ExperimentByVersionVisitor experimentVisitor = new ExperimentByVersionVisitor(version);
+        this.getMetaDataRoot().acceptVisitor(experimentVisitor);
+        experimentList = experimentVisitor.getExperimentList();
+
+        // for experiment, find the property list
+        for (Experiment experiment : experimentList) {
+            if (experiment.getTechnology().equalsIgnoreCase(technology)){
+                PropertyPerExperimentVisitor propertyPerExperimentVisitor = new PropertyPerExperimentVisitor(propertyName);
+                experiment.acceptVisitor(propertyPerExperimentVisitor);
+                propertyList = propertyPerExperimentVisitor.getPropertyList();
+                finalPropertyList.addAll(propertyList);
+            }
+        }
+
+        return finalPropertyList;
+    }
+
+
+    public List<Phenotype> getAllPhenotypesWithName(String phenotypeName, String version, String technology) throws PortalException {
+        List<Phenotype> phenotypeList = new ArrayList<Phenotype>();
+        List<Experiment> experimentList;
+        List<Phenotype> finalPhenotypeList = new ArrayList<Phenotype>();
+
+        // find the experiment
+        ExperimentByVersionVisitor experimentVisitor = new ExperimentByVersionVisitor(version);
+        this.getMetaDataRoot().acceptVisitor(experimentVisitor);
+        experimentList = experimentVisitor.getExperimentList();
+
+        // for experiment, find the property list
+        for (Experiment experiment : experimentList) {
+            if (experiment.getTechnology().equalsIgnoreCase(technology)){
+                PhenotypeByNameVisitor phenotypeByNameVisitor = new PhenotypeByNameVisitor(phenotypeName);
+                experiment.acceptVisitor(phenotypeByNameVisitor);
+                phenotypeList = phenotypeByNameVisitor.getPhenotypeList();
+                finalPhenotypeList.addAll(phenotypeList);
+            }
+        }
+
+        return finalPhenotypeList;
+    }
 
     /**
      * get the json metadata
@@ -240,6 +309,7 @@ public class JsonParserService {
         SampleGroup tempSampleGroup;
         Property tempProperty;
         Phenotype tempPhenotype;
+        Integer tempJsonInt;
 
         try {
             // create the object and add the primitive variables
@@ -247,6 +317,12 @@ public class JsonParserService {
             sampleGroup.setAncestry(jsonObject.getString(PortalConstants.JSON_ANCESTRY_KEY));
             sampleGroup.setSystemId(jsonObject.getString(PortalConstants.JSON_ID_KEY));
             sampleGroup.setParent(parent);
+
+            // add in sort order
+            tempJsonInt = jsonObject.getInt(PortalConstants.JSON_SORT_ORDER_KEY);
+            if (tempJsonInt != null) {
+                sampleGroup.setSortOrder(tempJsonInt);
+            }
 
             // add in properties
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PROPERTIES_KEY);
@@ -288,7 +364,7 @@ public class JsonParserService {
         // local variables
         PropertyBean property = new PropertyBean();
         String tempJsonValue;
-        int tempJsonInt;
+        Integer tempJsonInt;
 
         // get values and put in new object
         try {
@@ -298,8 +374,9 @@ public class JsonParserService {
             if (tempJsonValue != null) {
                 property.setSearchable(Boolean.valueOf(tempJsonValue));
             }
+
             tempJsonInt = jsonObject.getInt(PortalConstants.JSON_SORT_ORDER_KEY);
-            if (tempJsonValue != null) {
+            if (tempJsonInt != null) {
                 property.setSortOrder(tempJsonInt);
             }
             property.setParent(parent);
@@ -323,12 +400,19 @@ public class JsonParserService {
         PhenotypeBean phenotype = new PhenotypeBean();
         JSONArray tempArray;
         Property tempProperty;
+        Integer tempJsonInt;
 
         // get values from json object and put in new phenotype object
         try {
             // get the primitive variables
             phenotype.setName(jsonObject.getString(PortalConstants.JSON_NAME_KEY));
             phenotype.setGroup(jsonObject.getString(PortalConstants.JSON_GROUP_KEY));
+            tempJsonInt = jsonObject.getInt(PortalConstants.JSON_SORT_ORDER_KEY);
+            if (tempJsonInt != null) {
+                phenotype.setSortOrder(tempJsonInt);
+            }
+
+            phenotype.setParent(parent);
 
             // get the sub properties
             tempArray = jsonObject.getJSONArray(PortalConstants.JSON_PROPERTIES_KEY);
@@ -350,22 +434,29 @@ public class JsonParserService {
      * @param phenotypeName
      * @return
      */
-    public List<String> getSamplesGroupsForPhenotype(String phenotypeName) throws PortalException {
+    public List<SampleGroup> getSamplesGroupsForPhenotype(String phenotypeName, String dataVersion) throws PortalException {
         // local variables
         SampleGroupForPhenotypeVisitor sampleGroupVisitor = new SampleGroupForPhenotypeVisitor(phenotypeName);
-        List<String> sampleGroupNameList;
+        List<SampleGroup> groupList;
 
         // pass in visitor looking for sample groups with the selected phenotype
         for (Experiment experiment: this.getMetaDataRoot().getExperiments()) {
-            experiment.acceptVisitor(sampleGroupVisitor);
+            // if no version, then go through all experiments
+            if (dataVersion == null) {
+                experiment.acceptVisitor(sampleGroupVisitor);
+
+                // if version, first filter experiment on version
+            } else {
+                if (experiment.getVersion().equalsIgnoreCase(dataVersion)) {
+                    experiment.acceptVisitor(sampleGroupVisitor);
+                }
+            }
         }
 
         // return the resulting string list
-        sampleGroupNameList = sampleGroupVisitor.getSampleGroupNameList();
+        groupList = sampleGroupVisitor.getSampleGroupList();
 
-        // sort and return
-        Collections.sort(sampleGroupNameList);
-        return sampleGroupNameList;
+        return groupList;
     }
 
     /**
@@ -412,6 +503,100 @@ public class JsonParserService {
 
     public void setJsonString(String jsonString) {
         this.jsonString = jsonString;
+    }
+
+    /**
+     * return the searchable common properties
+     *
+     * @return
+     * @throws PortalException
+     */
+    public List<Property> getSearchableCommonProperties() throws PortalException {
+        // local variables
+        List<Property> commonPropertyList;
+
+        // get the searchable common property visitor
+        SearchableCommonPropertyVisitor visitor = new SearchableCommonPropertyVisitor();
+
+        // set the visitor on the metadata root
+        this.getMetaDataRoot().acceptVisitor(visitor);
+
+        // get the common property list
+        commonPropertyList = visitor.getProperties();
+
+        // return the result
+        return commonPropertyList;
+    }
+
+    /**
+     * return the GWAS first level sample group with the phenotype name
+     *
+     * @param phenotypeString
+     * @return
+     * @throws PortalException
+     */
+    public String getGwasSampleGroupNameForPhenotype(String phenotypeString) throws PortalException {
+        // local variables
+        String sampleGroupName;
+
+        // get the gwas phenotype visitor
+        TechSampleGroupByPhenotypeVisitor visitor = new TechSampleGroupByPhenotypeVisitor(PortalConstants.TECHNOLOGY_GWAS_KEY, phenotypeString);
+
+        // set the visitor on the metadata root
+        this.getMetaDataRoot().acceptVisitor(visitor);
+
+        // retrieve the sample group name and return
+        sampleGroupName = visitor.getSampleGroupName();
+        return sampleGroupName;
+    }
+
+    /**
+     * find all the seaechable properties for a sample group and all its children
+     *
+     * @param sampleGroupId
+     * @return
+     * @throws PortalException
+     */
+    public List<String> getSearchablePropertiesForSampleGroupAndChildren(String sampleGroupId) throws PortalException {
+        // local variables
+        SampleGroup sampleGroup;
+        List<String> propertyNameList = new ArrayList<String>();
+
+        // find the sample group
+        SampleGroupByIdSelectingVisitor finderVisitor = new SampleGroupByIdSelectingVisitor(sampleGroupId);
+        this.getMetaDataRoot().acceptVisitor(finderVisitor);
+        sampleGroup = finderVisitor.getSampleGroup();
+
+        // if the sample group exists, find all searchable properties
+        if (sampleGroup != null) {
+            SearchablePropertyIncludingChildrenVisitor propertyVisitor = new SearchablePropertyIncludingChildrenVisitor();
+            sampleGroup.acceptVisitor(propertyVisitor);
+            propertyNameList = propertyVisitor.getDistinctPropertyNameList();
+        }
+
+        // return the property string
+        return propertyNameList;
+    }
+
+    /**
+     * find the first property by its name
+     *
+     * @param propertyName
+     * @return
+     * @throws PortalException
+     */
+    public Property findPropertyByName(String propertyName) throws PortalException {
+        Property property;
+
+        // create the visitor and traverse from root
+        PropertyByNameFinderVisitor propertyVisitor = new PropertyByNameFinderVisitor(propertyName);
+        this.getMetaDataRoot().acceptVisitor(propertyVisitor);
+
+        // get the property
+        property = propertyVisitor.getProperty();
+
+        // return
+        return property;
     }
 
     public void setContext(Context context) {

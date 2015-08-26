@@ -10,7 +10,9 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.wintersoldier.diabetesportal.bean.SampleGroup;
 import com.wintersoldier.diabetesportal.service.JsonParserService;
+import com.wintersoldier.diabetesportal.util.PortalConstants;
 import com.wintersoldier.diabetesportal.util.PortalException;
 
 import java.util.ArrayList;
@@ -108,7 +110,8 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
     protected void actOnSelectedPhenotype(int position) {
         // local variables
         String selectedPhenotype = null;
-        List<String> sampleGroupList = new ArrayList<String>();
+        List<SampleGroup> sampleGroupList = new ArrayList<SampleGroup>();
+        List<String> groupNameList = new ArrayList<String>();
 
         // get the selected phenotype
         try {
@@ -122,10 +125,15 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
 
         // retrieve the sample groups which contain this phenotype
         try {
-            sampleGroupList = this.getJsonService().getSamplesGroupsForPhenotype(selectedPhenotype);
+            sampleGroupList = this.getJsonService().getSamplesGroupsForPhenotype(selectedPhenotype, PortalConstants.DATASET_VERSION_2_KEY);
 
         } catch (PortalException exception) {
             Log.e(this.getClass().getName(), "Got exception getting phenotype names: " + exception.getMessage());
+        }
+
+        // get the string list
+        for (SampleGroup tempGroup: sampleGroupList) {
+            groupNameList.add(tempGroup.getName());
         }
 
         // populate the spinner of sample groups

@@ -15,18 +15,19 @@ import java.util.List;
 public class SampleGroupForPhenotypeVisitor implements DataSetVisitor {
     private List<String> sampleGroupNameList;
     private String phenotypeName;
+    private List<SampleGroup> sampleGroupList;
 
     public SampleGroupForPhenotypeVisitor(String phenotypeName) {
         this.sampleGroupNameList = new ArrayList<String>();
+        this.sampleGroupList = new ArrayList<SampleGroup>();
         this.phenotypeName = phenotypeName;
     }
 
     /**
-     * method to visit sampel group and add it's name to list if it contains the desired phenotype
+     * method to visit sample group and add it's name to list if it contains the desired phenotype
      *
      * @param dataSet                   the data set to visit
      */
-    @Override
     public void visit(DataSet dataSet) {
         // local variables
         SampleGroup group;
@@ -40,6 +41,7 @@ public class SampleGroupForPhenotypeVisitor implements DataSetVisitor {
                 // if contained, then add sample group name to list
                 if (phenotype.getName().equalsIgnoreCase(this.phenotypeName)) {
                     this.sampleGroupNameList.add(group.getSystemId());
+                    this.sampleGroupList.add(group);
                     break;
                 }
             }
@@ -48,10 +50,12 @@ public class SampleGroupForPhenotypeVisitor implements DataSetVisitor {
         for (DataSet child : dataSet.getAllChildren()) {
             child.acceptVisitor(this);
         }
-
     }
 
     public List<String> getSampleGroupNameList() {
         return sampleGroupNameList;
     }
-}
+
+    public List<SampleGroup> getSampleGroupList() {
+        return sampleGroupList;
+    }}
