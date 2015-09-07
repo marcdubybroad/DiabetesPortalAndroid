@@ -15,11 +15,13 @@ import com.wintersoldier.diabetesportal.bean.Phenotype;
 import com.wintersoldier.diabetesportal.bean.PhenotypeBean;
 import com.wintersoldier.diabetesportal.bean.Property;
 import com.wintersoldier.diabetesportal.bean.PropertyBean;
+import com.wintersoldier.diabetesportal.bean.visitor.AllDataSetHashSetVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.ExperimentByVersionVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeByNameVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeNameVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PropertyByNameFinderVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.PropertyByPropertyTypeVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PropertyPerExperimentVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.SampleGroupByIdSelectingVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.SampleGroupForPhenotypeVisitor;
@@ -38,8 +40,10 @@ import org.json.JSONTokener;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -53,6 +57,9 @@ public class JsonParserService {
     private MetaDataRoot metaDataRoot = null;
     private String jsonString;
     private Context context;                            // better to pass this in at method time, but gums up junit tests then
+
+    // cached data set map
+    Map<String, DataSet> dataSetMap = new HashMap<String, DataSet>();
 
     /**
      * singleton service to parse metadata
@@ -601,5 +608,62 @@ public class JsonParserService {
 
     public void setContext(Context context) {
         this.context = context;
+    }
+
+    /**
+     * method to build the map of all data set nodes
+     *
+     * @return
+     * @throws PortalException
+     */
+    public Map<String, DataSet> getMapOfAllDataSetNodes() throws PortalException {
+        if ((this.dataSetMap == null) || (this.dataSetMap.size() < 1)) {
+            // local variables
+            Map<String, DataSet> dataSetMap = null;
+
+            // create the visitor
+            AllDataSetHashSetVisitor visitor = new AllDataSetHashSetVisitor();
+
+            // visit the metadata root
+            this.getMetaDataRoot().acceptVisitor(visitor);
+
+            // make sure there were no errors
+            if (visitor.getError() != null) {
+                throw new PortalException("there was a duplicate map key: " + visitor.getError());
+            }
+
+            // if not, then get map
+            dataSetMap = visitor.getDataSetMap();
+
+            // set the dataSetMap
+            this.dataSetMap = dataSetMap;
+        }
+
+        // return the map
+        return this.dataSetMap;
+    }
+
+    /**
+     * returns a list of all the properties of a given type
+     *
+     * @param propertyType
+     * @return
+     * @throws PortalException
+     */
+    public List<Property> getPropertyListOfPropertyType(DataSet dataSetNodeToStartFrom, String propertyType) throws PortalException {
+        // local variables
+        List<Property> propertyList = null;
+
+        // create the visitor
+        PropertyByPropertyTypeVisitor visitor = new PropertyByPropertyTypeVisitor(propertyType);
+
+        // visit the metadata root
+        dataSetNodeToStartFrom.acceptVisitor(visitor);
+
+        // get the property list
+        propertyList = visitor.getPropertyList();
+
+        // return
+        return propertyList;
     }
 }

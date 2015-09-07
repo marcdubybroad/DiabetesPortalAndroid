@@ -37,7 +37,7 @@ public class SampleGroupBean implements SampleGroup {
     }
 
     public String getId() {
-        return (this.parent == null ? "" : this.parent.getId()) + this.getId();
+        return (this.parent == null ? "" : this.parent.getId() + "_") + this.getName();
     }
 
     public DataSet getParent() {
@@ -152,4 +152,45 @@ public class SampleGroupBean implements SampleGroup {
     public void setSystemId(String systemId) {
         this.systemId = systemId;
     }
+
+    /**
+     * returns how many levels down this sample group is nested in other sample groups
+     *
+     * @return
+     */
+    public Integer getNestedLevel() {
+        if (this.getParent() == null || this.getParent().getType() != PortalConstants.TYPE_SAMPLE_GROUP_KEY) {
+            return 0;
+        } else {
+            // the parent is a sample group, so cast
+            SampleGroup groupParent = (SampleGroup)this.getParent();
+            return (1 + groupParent.getNestedLevel());
+        }
+    }
+
+    /**
+     * returns sort int of objects; compares first on sort order, then name
+     *
+     * @param object
+     * @return
+     */
+    public int compareTo(Object object) {
+        if (object == null) {
+            return 1;
+        } else {
+            SampleGroup otherBean = (SampleGroup)object;
+
+            if (this.getSortOrder() == otherBean.getSortOrder()) {
+                if (this.getNestedLevel().equals(otherBean.getNestedLevel())) {
+                    return this.getName().compareTo(otherBean.getName());
+
+                } else {
+                    return this.getNestedLevel().compareTo(otherBean.getNestedLevel());
+                }
+            } else {
+                return (this.getSortOrder() < otherBean.getSortOrder() ? -1 : 1);
+            }
+        }
+    }
+
 }

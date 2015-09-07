@@ -22,7 +22,7 @@ public class PhenotypeBean implements Phenotype, Comparable {
     }
 
     public String getId() {
-        return (this.parent == null ? "" : this.parent.getId()) + this.getId();
+        return (this.parent == null ? "" : this.parent.getId()) + this.getName();
     }
 
     public DataSet getParent() {

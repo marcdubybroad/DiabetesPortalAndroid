@@ -48,11 +48,11 @@ public class ExperimentBean implements Experiment {
     }
 
     public String getId() {
-        return this.getName();
+        return (this.getParent() == null ? "" : this.getParent().getId() + "_") + this.getName() + "_" + this.getVersion();
     }
 
     public DataSet getParent() {
-        return null;
+        return this.parent;
     }
 
     public List<SampleGroup> getSampleGroups() {
@@ -68,7 +68,7 @@ public class ExperimentBean implements Experiment {
     }
 
     public void setParent(DataSet dataSet) {
-        this.parent = parent;
+        this.parent = dataSet;
     }
 
     /**
