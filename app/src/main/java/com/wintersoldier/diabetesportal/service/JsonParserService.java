@@ -251,10 +251,22 @@ public class JsonParserService {
      * @return
      */
     protected String getJsonMetadata() throws PortalException {
+        // read the file
+        if (this.context != null) {
+            InputStream inputStream = context.getResources().openRawResource(R.raw.metadata);
+            jsonString = new Scanner(inputStream).useDelimiter("\\A").next();
+
+        } else {
+            // TODO - mostly for junit testing sake; need to refactor
+            jsonString = (this.jsonString != null ? this.jsonString : "");
+        }
+
+        /*
         if (this.jsonString == null) {
             throw new PortalException("the metadata json string has not been set");
         }
-
+        */
+        
         return this.jsonString;
     }
 

@@ -193,4 +193,8 @@ public class SampleGroupBean implements SampleGroup {
         }
     }
 
+    public String toString() {
+        return this.getSystemId();
+    }
+
 }
