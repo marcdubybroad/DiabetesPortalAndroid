@@ -20,6 +20,7 @@ import com.wintersoldier.diabetesportal.bean.visitor.DataSetVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.ExperimentByVersionVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeByNameVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PhenotypeNameVisitor;
+import com.wintersoldier.diabetesportal.bean.visitor.PropertyByItsAndParentNamesVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PropertyByNameFinderVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PropertyByPropertyTypeVisitor;
 import com.wintersoldier.diabetesportal.bean.visitor.PropertyPerExperimentVisitor;
@@ -677,5 +678,32 @@ public class JsonParserService {
 
         // return
         return propertyList;
+    }
+
+    /**
+     * find the property given its name, sample group and phenotype name (latter 2 could be null)
+     *
+     * @param propertyName
+     * @param phenotypeName
+     * @param sampleGroupName
+     * @return
+     * @throws PortalException
+     */
+    public Property getPropertyGivenItsAndPhenotypeAndSampleGroupNames(String propertyName, String phenotypeName, String sampleGroupName) throws PortalException {
+        // local variables
+        Property property = null;
+
+        // create the visitor and visit from the root
+        PropertyByItsAndParentNamesVisitor visitor = new PropertyByItsAndParentNamesVisitor(propertyName, sampleGroupName, phenotypeName);
+        this.getMetaDataRoot().acceptVisitor(visitor);
+
+        // get the property; throw exception if not found
+        property = visitor.getProperty();
+        if (property == null) {
+            throw new PortalException("Did not find property for name: " + propertyName + " and sample group: " + sampleGroupName + " and phenotype: " + phenotypeName);
+        }
+
+        // return
+        return property;
     }
 }

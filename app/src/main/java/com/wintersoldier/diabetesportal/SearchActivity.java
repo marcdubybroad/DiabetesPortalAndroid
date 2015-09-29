@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.wintersoldier.diabetesportal.bean.SampleGroup;
 import com.wintersoldier.diabetesportal.service.JsonParserService;
@@ -22,6 +23,7 @@ import java.util.List;
 public class SearchActivity extends ActionBarActivity implements AdapterView.OnItemSelectedListener {
     // instance variables
     JsonParserService jsonService;
+    List<SampleGroup> sampleGroupList = new ArrayList<SampleGroup>();
 
 
     @Override
@@ -93,13 +95,37 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
             case R.id.search_phenotype_spinner:
                 this.actOnSelectedPhenotype(position);
                 break;
+            case R.id.search_sample_group_spinner:
+                this.actOnSelectedPhenotype(position);
+                break;
+            default:
+                Log.e(this.getClass().getName(), "got incorrect spinner selector with id: " + id);
+                break;
         }
 
     }
 
+    protected void actOnSelectedSampleGroup(int position) {
+        // local variables
+        SampleGroup sampleGroup = null;
+
+        // get the selected sample group
+        sampleGroup = this.sampleGroupList.get(position);
+
+        // make sure not null
+        if (sampleGroup == null) {
+            Log.e(this.getClass().getName(), "got null sample group for selected spinner position: " + position);
+        } else {
+            Log.i(this.getClass().getName(), "got selected sample group: " + sampleGroup.getId());
+
+            // set the text view
+            TextView sampleGroupView = (TextView)this.findViewById(R.id.selectedSampleGroupTextView);
+            sampleGroupView.setText(sampleGroup.getId());
+        }
+    }
+
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
     }
 
     /**
@@ -110,7 +136,6 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
     protected void actOnSelectedPhenotype(int position) {
         // local variables
         String selectedPhenotype = null;
-        List<SampleGroup> sampleGroupList = new ArrayList<SampleGroup>();
         List<String> groupNameList = new ArrayList<String>();
 
         // get the selected phenotype
@@ -125,14 +150,14 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
 
         // retrieve the sample groups which contain this phenotype
         try {
-            sampleGroupList = this.getJsonService().getSamplesGroupsForPhenotype(selectedPhenotype, PortalConstants.DATASET_VERSION_2_KEY);
+            this.sampleGroupList = this.getJsonService().getSamplesGroupsForPhenotype(selectedPhenotype, PortalConstants.DATASET_VERSION_2_KEY);
 
         } catch (PortalException exception) {
             Log.e(this.getClass().getName(), "Got exception getting phenotype names: " + exception.getMessage());
         }
 
         // get the string list
-        for (SampleGroup tempGroup: sampleGroupList) {
+        for (SampleGroup tempGroup: this.sampleGroupList) {
             groupNameList.add(tempGroup.getName());
         }
 
