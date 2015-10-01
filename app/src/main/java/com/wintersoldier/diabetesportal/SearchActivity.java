@@ -96,7 +96,7 @@ public class SearchActivity extends ActionBarActivity implements AdapterView.OnI
                 this.actOnSelectedPhenotype(position);
                 break;
             case R.id.search_sample_group_spinner:
-                this.actOnSelectedPhenotype(position);
+                this.actOnSelectedSampleGroup(position);
                 break;
             default:
                 Log.e(this.getClass().getName(), "got incorrect spinner selector with id: " + id);
