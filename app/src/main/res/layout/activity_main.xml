@@ -20,7 +20,16 @@
         android:text="@string/button_search"
         android:id="@+id/button_main_search"
         android:layout_marginTop="120dp"
-        android:layout_below="@+id/textView"
+        android:layout_below="@+id/imageView1"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_load_metadata"
+        android:id="@+id/button_load_metadata"
+        android:layout_marginTop="120dp"
+        android:layout_below="@+id/button_main_search"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

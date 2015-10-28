@@ -4,11 +4,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 
+/**
+ * main class to drive the gene search application
+ * 
+ */
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
 
     @Override
@@ -18,6 +23,9 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         // add the button listeners
         View searchButton = this.findViewById(R.id.button_main_search);
+        searchButton.setOnClickListener(this);
+
+        searchButton = this.findViewById(R.id.button_load_metadata);
         searchButton.setOnClickListener(this);
     }
 
@@ -53,8 +61,15 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
         switch(view.getId()) {
             case R.id.button_main_search:
+                Log.i(this.getClass().getName(), "loading search activity");
                 intent = new Intent(this, SearchActivity.class);
                 this.startActivity(intent);
+                break;
+            case R.id.button_load_metadata:
+                Log.i(this.getClass().getName(), "loading metadata load activity");
+                intent = new Intent(this, MetadataLoadActivity.class);
+                this.startActivity(intent);
+
                 break;
         }
     }

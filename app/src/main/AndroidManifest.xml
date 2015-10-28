@@ -20,6 +20,10 @@
             android:name=".SearchActivity"
             android:label="@string/title_activity_search" >
         </activity>
+        <activity
+            android:name=".MetadataLoadActivity"
+            android:label="@string/title_activity_metadata_load" >
+        </activity>
     </application>
 
 </manifest>

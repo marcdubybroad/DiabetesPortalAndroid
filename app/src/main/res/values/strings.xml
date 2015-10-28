@@ -4,11 +4,14 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_search">Search the Variant Data</string>
+    <string name="title_activity_metadata_load">Metadata Load</string>
 
     <string name="button_search">Search For Variants</string>
+    <string name="button_load_metadata">Reload Metadata</string>
 
     <string name="header_search_select_phenotype">Select the Phenotype</string>
     <string name="header_search_select_dataset">Select the Sample Group</string>
     <string name="header_search_select_filters">Select the Filters</string>
 
+    <string name="text_metadata_load_default">Metadata not loaded</string>
 </resources>
