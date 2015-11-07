@@ -12,7 +12,7 @@ import android.view.View;
 
 /**
  * main class to drive the gene search application
- * 
+ *
  */
 public class MainActivity extends ActionBarActivity implements View.OnClickListener {
 

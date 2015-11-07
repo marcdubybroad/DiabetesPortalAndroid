@@ -8,10 +8,14 @@
 
     <string name="button_search">Search For Variants</string>
     <string name="button_load_metadata">Reload Metadata</string>
+    <string name="button_metadata_load_action">Load Metadata</string>
 
     <string name="header_search_select_phenotype">Select the Phenotype</string>
     <string name="header_search_select_dataset">Select the Sample Group</string>
     <string name="header_search_select_filters">Select the Filters</string>
+    <string name="header_metadata_load_results">Metadata Results</string>
+
+    <string name="header_metadata_load_status"></string>
 
     <string name="text_metadata_load_default">Metadata not loaded</string>
 </resources>
